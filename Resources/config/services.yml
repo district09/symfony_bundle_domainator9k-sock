@@ -1,0 +1,4 @@
+services:
+    DigipolisGent\Domainator9k\SockBundle\Provider\DataTypeProvider:
+        tags:
+            - { name: data_type_provider }
