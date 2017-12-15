@@ -2,3 +2,6 @@ services:
     DigipolisGent\Domainator9k\SockBundle\Provider\DataTypeProvider:
         tags:
             - { name: data_type_provider }
+    DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener:
+        tags:
+            - { name: kernel.event_listener, event: domainator.build, method: onBuild, priority: 1 }
