@@ -1,7 +1,27 @@
 services:
+    _defaults:
+        autowire: true
     DigipolisGent\Domainator9k\SockBundle\Provider\DataTypeProvider:
+        public: true
         tags:
             - { name: data_type_provider }
     DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener:
         tags:
-            - { name: kernel.event_listener, event: domainator.build, method: onBuild, priority: 1 }
+            - { name: kernel.event_listener, event: domainator.build, method: onBuild, priority: 50 }
+    DigipolisGent\Domainator9k\SockBundle\FieldType\ParentApplicationFieldType:
+        public: true
+        tags:
+            - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\SockServerFieldType:
+        public: true
+        tags:
+            - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\ManageSockFieldType:
+        public: true
+        tags:
+            - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\SshKeyChoiceFieldType:
+        public: true
+        tags:
+            - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\Service\ApiService:

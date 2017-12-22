@@ -1,0 +1,76 @@
+<?php
+
+
+namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
+
+
+use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
+use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
+use DigipolisGent\SettingBundle\FieldType\BooleanFieldType;
+use DigipolisGent\SettingBundle\Service\DataValueService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+/**
+ * Class ManageSockFieldType
+ * @package DigipolisGent\Domainator9k\SockBundle\FieldType
+ */
+class ManageSockFieldType extends BooleanFieldType
+{
+
+    private $entityManager;
+    private $dataValueService;
+
+    public function __construct(EntityManagerInterface $entityManager, DataValueService $dataValueService)
+    {
+        $this->entityManager = $entityManager;
+        $this->dataValueService = $dataValueService;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getName(): string
+    {
+        return 'manage_sock';
+    }
+
+    public function getOptions($value): array
+    {
+        $options = parent::getOptions($value);
+        $options['constraints'] = [
+            new Callback(function ($value, ExecutionContextInterface $context) {
+                if (!$value) {
+                    return;
+                }
+
+                $currentServer = $this->getOriginEntity();
+
+                $serverRepository = $this->entityManager->getRepository(Server::class);
+                $servers = $serverRepository->findBy(['environment' => $currentServer->getEnvironment()]);
+                foreach ($servers as $server) {
+                    if ($server == $currentServer) {
+                        continue;
+                    }
+
+                    $manageSock = $this->dataValueService->getValue($server, 'manage_sock');
+                    if ($manageSock) {
+                        $context->addViolation(
+                            sprintf(
+                                'The server with name %s is allready managing sock for the %s environment',
+                                $server->getName(),
+                                $server->getEnvironment()
+                            )
+                        );
+                    }
+                }
+            })
+        ];
+
+        return $options;
+    }
+
+}
