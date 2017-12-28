@@ -8,6 +8,9 @@ services:
     DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener:
         tags:
             - { name: kernel.event_listener, event: domainator.build, method: onBuild, priority: 50 }
+    DigipolisGent\Domainator9k\SockBundle\EventListener\DestroyEventListener:
+        tags:
+            - { name: kernel.event_listener, event: domainator.destroy, method: onDestroy, priority: 50 }
     DigipolisGent\Domainator9k\SockBundle\FieldType\ParentApplicationFieldType:
         public: true
         tags:

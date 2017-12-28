@@ -4,13 +4,10 @@
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
 
-use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
-use DigipolisGent\Domainator9k\CoreBundle\Service\BuildLoggerService;
-use DigipolisGent\Domainator9k\CoreBundle\Tools\StringHelper;
+use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,7 +21,7 @@ class BuildEventListener
 {
 
     private $dataValueService;
-    private $buildLoggerService;
+    private $taskLoggerService;
     private $apiService;
     private $entityManager;
 
@@ -34,12 +31,12 @@ class BuildEventListener
      */
     public function __construct(
         DataValueService $dataValueService,
-        BuildLoggerService $buildLoggerService,
+        TaskLoggerService $taskLoggerService,
         ApiService $apiService,
         EntityManagerInterface $entityManager
     ) {
         $this->dataValueService = $dataValueService;
-        $this->buildLoggerService = $buildLoggerService;
+        $this->taskLoggerService = $taskLoggerService;
         $this->apiService = $apiService;
         $this->entityManager = $entityManager;
     }
@@ -49,7 +46,7 @@ class BuildEventListener
      */
     public function onBuild(BuildEvent $event)
     {
-        $applicationEnvironment = $event->getBuild()->getApplicationEnvironment();
+        $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
         foreach ($applicationEnvironment->getApplication()->getApplicationServers() as $applicationServer) {
@@ -78,7 +75,7 @@ class BuildEventListener
                 $this->createSockDatabase($applicationEnvironment, $applicationServer);
 
             } catch (ClientException $exception) {
-                $this->buildLoggerService->addLine(
+                $this->taskLoggerService->addLine(
                     sprintf(
                         'Error on updating sock with message "%s"',
                         $exception->getMessage()
@@ -112,7 +109,7 @@ class BuildEventListener
         $this->apiService->getVirtualServer($sockServerId);
 
         if ($parentApplication) {
-            $this->buildLoggerService->addLine(sprintf(
+            $this->taskLoggerService->addLine(sprintf(
                 'using existing account "%s" as parent on Sock Virtual Server %s',
                 $parentApplication->getName(),
                 $sockServerId
@@ -123,7 +120,7 @@ class BuildEventListener
 
         $username = $application->getNameCanonical();
 
-        $this->buildLoggerService->addLine(sprintf(
+        $this->taskLoggerService->addLine(sprintf(
             'requesting account "%s" on Sock Virtual Server %s',
             $username,
             $sockServerId
@@ -133,7 +130,7 @@ class BuildEventListener
         $sshKeyIds = $this->dataValueService->getValue($applicationEnvironment, 'sock_ssh_key');
 
         if (!$account) {
-            $this->buildLoggerService->addLine(sprintf(
+            $this->taskLoggerService->addLine(sprintf(
                 'account "%s" created on Sock Virtual Server %s',
                 $username,
                 $sockServerId
@@ -167,7 +164,7 @@ class BuildEventListener
             $applicationName = $parentApplication->getNameCanonical();
         }
 
-        $this->buildLoggerService->addLine(sprintf(
+        $this->taskLoggerService->addLine(sprintf(
             'requesting application "%s" for Sock Account %s',
             $applicationName,
             $sockAccountId
@@ -176,7 +173,7 @@ class BuildEventListener
         $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
 
         if (!$application) {
-            $this->buildLoggerService->addLine(sprintf(
+            $this->taskLoggerService->addLine(sprintf(
                 'application "%s" created on for Sock Account %s',
                 $applicationName,
                 $sockAccountId
@@ -227,7 +224,7 @@ class BuildEventListener
         // Check if the account exists
         $this->apiService->getAccount($sockAccountId);
 
-        $this->buildLoggerService->addLine(sprintf(
+        $this->taskLoggerService->addLine(sprintf(
             'requesting database "%s" for Sock Account %s',
             $databaseName,
             $sockAccountId
@@ -236,7 +233,7 @@ class BuildEventListener
         $database = $this->apiService->findDatabaseByName($databaseName, $sockAccountId);
 
         if (!$database) {
-            $this->buildLoggerService->addLine(sprintf(
+            $this->taskLoggerService->addLine(sprintf(
                 'database "%s" created on for Sock Account %s',
                 $databaseName,
                 $sockAccountId

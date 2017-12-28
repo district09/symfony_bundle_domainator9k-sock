@@ -4,7 +4,6 @@
 namespace DigipolisGent\Domainator9k\SockBundle\Service;
 
 
-use DigipolisGent\Domainator9k\CoreBundle\Service\BuildLoggerService;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 
@@ -19,18 +18,7 @@ class ApiService
     private $clientToken;
     private $userToken;
 
-    private $buildLoggerService;
-
     private static $client = null;
-
-    /**
-     * ApiService constructor.
-     * @param BuildLoggerService $buildLoggerService
-     */
-    public function __construct(BuildLoggerService $buildLoggerService)
-    {
-        $this->buildLoggerService = $buildLoggerService;
-    }
 
     public function setHost($host)
     {
@@ -315,5 +303,21 @@ class ApiService
     public function removeAccount($accountId)
     {
         $this->delete('/accounts/' . $accountId);
+    }
+
+    /**
+     * @param $applicationId
+     */
+    public function removeApplication($applicationId)
+    {
+        $this->delete('/applications/' . $applicationId);
+    }
+
+    /**
+     * @param $databaseId
+     */
+    public function removeDatabase($databaseId)
+    {
+        $this->delete('/databases/' . $databaseId);
     }
 }
