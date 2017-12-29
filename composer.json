@@ -8,10 +8,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.1",
-        "symfony/symfony": ">=3.0"
-    },
-    "require-dev": {
-        "symfony/symfony": ">=3.0"
+        "symfony/symfony": ">=3.4"
     },
     "autoload": {
         "psr-4": { "DigipolisGent\\Domainator9k\\SockBundle\\": "" }
