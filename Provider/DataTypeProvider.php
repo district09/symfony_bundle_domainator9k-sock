@@ -5,8 +5,6 @@ namespace DigipolisGent\Domainator9k\SockBundle\Provider;
 
 
 use DigipolisGent\SettingBundle\Provider\DataTypeProviderInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 /**
  * Class DataTypeProvider
@@ -72,7 +70,7 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'label' => 'Sock ssh keys',
                 'required' => false,
                 'field_type' => 'ssh_key_choice',
-                'entity_types' => ['environment','application_environment'],
+                'entity_types' => ['environment', 'application_environment'],
                 'order' => 4
             ],
             [

@@ -1,16 +1,18 @@
 {
-    "name": "digipolisgent/domainator9k-sock-bundle",
-    "type": "symfony-bundle",
-    "description": "",
-    "license": "MIT",
-    "authors": [],
-    "support": {},
-    "minimum-stability": "dev",
-    "require": {
-        "php": ">=7.1",
-        "symfony/symfony": ">=3.4"
-    },
-    "autoload": {
-        "psr-4": { "DigipolisGent\\Domainator9k\\SockBundle\\": "" }
+  "name": "digipolisgent/domainator9k-sock-bundle",
+  "type": "symfony-bundle",
+  "description": "",
+  "license": "MIT",
+  "authors": [],
+  "support": {},
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=7.1",
+    "symfony/symfony": ">=3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "DigipolisGent\\Domainator9k\\SockBundle\\": ""
     }
+  }
 }

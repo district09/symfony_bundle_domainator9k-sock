@@ -4,13 +4,10 @@
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
 
-use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
-use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
 use DigipolisGent\SettingBundle\FieldType\BooleanFieldType;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 

@@ -4,18 +4,11 @@
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
 use DigipolisGent\Domainator9k\CiTypes\JenkinsBundle\Entity\GroovyScript;
-use DigipolisGent\Domainator9k\CiTypes\JenkinsBundle\Entity\JenkinsJob;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationType;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationTypeEnvironment;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\Entity\SettingDataValue;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
-use DigipolisGent\SettingBundle\FieldType\FieldTypeInterface;
-use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 /**
@@ -28,7 +21,7 @@ class SshKeyChoiceFieldType extends AbstractFieldType
     private $apiService;
     private $entityManager;
 
-    public function __construct(ApiService $apiService,EntityManagerInterface $entityManager)
+    public function __construct(ApiService $apiService, EntityManagerInterface $entityManager)
     {
         $this->apiService = $apiService;
         $this->entityManager = $entityManager;
@@ -62,7 +55,7 @@ class SshKeyChoiceFieldType extends AbstractFieldType
         $options['expanded'] = true;
 
         $sshKeys = $this->apiService->getSshKeys();
-        foreach ($sshKeys as $sshKey){
+        foreach ($sshKeys as $sshKey) {
             $options['choices'][$sshKey['description']] = $sshKey['id'];
         }
 
@@ -93,6 +86,6 @@ class SshKeyChoiceFieldType extends AbstractFieldType
 
     public function decodeValue($value)
     {
-        return json_decode($value,true);
+        return json_decode($value, true);
     }
 }
