@@ -4,6 +4,7 @@
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
 
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
@@ -48,12 +49,11 @@ class DestroyEventListener
         $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
-        foreach ($applicationEnvironment->getApplication()->getApplicationServers() as $applicationServer) {
+        $servers = $this->entityManager->getRepository(Server::class)->findAll();
+
+        foreach ($servers as $server) {
 
             try {
-
-                $server = $applicationServer->getServer();
-
                 if ($server->getEnvironment() != $environment) {
                     continue;
                 }

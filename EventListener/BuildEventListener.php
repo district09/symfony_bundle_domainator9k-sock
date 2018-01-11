@@ -6,6 +6,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
@@ -49,12 +50,11 @@ class BuildEventListener
         $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
-        foreach ($applicationEnvironment->getApplication()->getApplicationServers() as $applicationServer) {
+        $servers = $this->entityManager->getRepository(Server::class)->findAll();
+
+        foreach ($servers as $server) {
 
             try {
-
-                $server = $applicationServer->getServer();
-
                 if ($server->getEnvironment() != $environment) {
                     continue;
                 }
@@ -65,14 +65,14 @@ class BuildEventListener
                     continue;
                 }
 
-                $this->createSockAccount($applicationEnvironment, $applicationServer);
-                $this->createSockApplication($applicationEnvironment, $applicationServer);
+                $this->createSockAccount($applicationEnvironment, $server);
+                $this->createSockApplication($applicationEnvironment);
 
                 if (!$applicationEnvironment->getApplication()->isHasDatabase()) {
                     continue;
                 }
 
-                $this->createSockDatabase($applicationEnvironment, $applicationServer);
+                $this->createSockDatabase($applicationEnvironment, $server);
 
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
@@ -92,15 +92,13 @@ class BuildEventListener
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
-     * @param ApplicationServer $applicationServer
+     * @param Server $server
      */
     public function createSockAccount(
         ApplicationEnvironment $applicationEnvironment,
-        ApplicationServer $applicationServer
+        Server $server
     ) {
-
         $application = $applicationEnvironment->getApplication();
-        $server = $applicationServer->getServer();
 
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
         $sockServerId = $this->dataValueService->getValue($server, 'sock_server_id');
@@ -145,12 +143,9 @@ class BuildEventListener
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
-     * @param ApplicationServer $applicationServer
      */
-    public function createSockApplication(
-        ApplicationEnvironment $applicationEnvironment,
-        ApplicationServer $applicationServer
-    ) {
+    public function createSockApplication(ApplicationEnvironment $applicationEnvironment)
+    {
         $application = $applicationEnvironment->getApplication();
 
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
@@ -191,12 +186,9 @@ class BuildEventListener
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
-     * @param ApplicationServer $applicationServer
      */
-    public function createSockDatabase(
-        ApplicationEnvironment $applicationEnvironment,
-        ApplicationServer $applicationServer
-    ) {
+    public function createSockDatabase(ApplicationEnvironment $applicationEnvironment)
+    {
         $application = $applicationEnvironment->getApplication();
         $environment = $applicationEnvironment->getEnvironment();
 
