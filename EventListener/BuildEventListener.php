@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;

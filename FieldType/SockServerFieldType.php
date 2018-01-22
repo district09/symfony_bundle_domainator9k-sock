@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

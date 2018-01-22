@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\DependencyInjection;
 
-
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 

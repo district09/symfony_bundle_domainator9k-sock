@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\Service;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 

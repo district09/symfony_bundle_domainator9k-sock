@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
 use Doctrine\ORM\EntityManagerInterface;

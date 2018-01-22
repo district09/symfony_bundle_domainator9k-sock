@@ -21,6 +21,11 @@ class SshKeyChoiceFieldType extends AbstractFieldType
     private $apiService;
     private $entityManager;
 
+    /**
+     * SshKeyChoiceFieldType constructor.
+     * @param ApiService $apiService
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(ApiService $apiService, EntityManagerInterface $entityManager)
     {
         $this->apiService = $apiService;
@@ -84,6 +89,10 @@ class SshKeyChoiceFieldType extends AbstractFieldType
         return json_encode($value);
     }
 
+    /**
+     * @param $value
+     * @return mixed
+     */
     public function decodeValue($value)
     {
         return json_decode($value, true);

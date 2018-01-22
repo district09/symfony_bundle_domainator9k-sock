@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
