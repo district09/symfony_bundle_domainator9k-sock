@@ -9,7 +9,9 @@
   "require": {
     "php": ">=7.1",
     "symfony/symfony": ">=3.4",
-    "doctrine/orm": "^2.5"
+    "doctrine/orm": "^2.5",
+    "digipolisgent/domainator9k-core-bundle": "dev-develop",
+    "guzzlehttp/guzzle": "^6.3"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.5",

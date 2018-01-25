@@ -24,7 +24,7 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'key' => 'sock_server_id',
                 'label' => 'Sock server',
                 'required' => true,
-                'field_type' => 'socker_server',
+                'field_type' => 'sock_server',
                 'entity_types' => ['server'],
             ],
             [

@@ -83,7 +83,6 @@ class BuildEventListener
 
                 continue;
             } catch (\Exception $exception) {
-                die(var_dump($exception->getMessage()));
                 // TODO : implement error handling
             }
         }
@@ -93,10 +92,8 @@ class BuildEventListener
      * @param ApplicationEnvironment $applicationEnvironment
      * @param Server $server
      */
-    public function createSockAccount(
-        ApplicationEnvironment $applicationEnvironment,
-        Server $server
-    ) {
+    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, Server $server)
+    {
         $application = $applicationEnvironment->getApplication();
 
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');

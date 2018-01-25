@@ -39,7 +39,7 @@ class SockServerFieldType extends AbstractFieldType
             $options['choices'][$virtualServer['hostname']] = $virtualServer['id'];
         }
 
-        $options['data'] = json_decode($value, true);
+        $options['data'] = $value;
 
         return $options;
     }
@@ -49,6 +49,6 @@ class SockServerFieldType extends AbstractFieldType
      */
     public static function getName(): string
     {
-        return 'socker_server';
+        return 'sock_server';
     }
 }

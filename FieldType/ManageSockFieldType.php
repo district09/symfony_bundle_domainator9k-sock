@@ -20,6 +20,11 @@ class ManageSockFieldType extends BooleanFieldType
     private $entityManager;
     private $dataValueService;
 
+    /**
+     * ManageSockFieldType constructor.
+     * @param EntityManagerInterface $entityManager
+     * @param DataValueService $dataValueService
+     */
     public function __construct(EntityManagerInterface $entityManager, DataValueService $dataValueService)
     {
         $this->entityManager = $entityManager;
@@ -34,6 +39,10 @@ class ManageSockFieldType extends BooleanFieldType
         return 'manage_sock';
     }
 
+    /**
+     * @param $value
+     * @return array
+     */
     public function getOptions($value): array
     {
         $options = parent::getOptions($value);
@@ -47,6 +56,7 @@ class ManageSockFieldType extends BooleanFieldType
 
                 $serverRepository = $this->entityManager->getRepository(Server::class);
                 $servers = $serverRepository->findBy(['environment' => $currentServer->getEnvironment()]);
+
                 foreach ($servers as $server) {
                     if ($server == $currentServer) {
                         continue;
@@ -68,4 +78,5 @@ class ManageSockFieldType extends BooleanFieldType
 
         return $options;
     }
+
 }

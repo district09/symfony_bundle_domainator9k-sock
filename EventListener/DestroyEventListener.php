@@ -64,6 +64,7 @@ class DestroyEventListener
                 }
 
                 $accountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
+
                 if ($accountId) {
                     $this->apiService->removeAccount($accountId);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
@@ -99,7 +100,6 @@ class DestroyEventListener
 
                 continue;
             } catch (\Exception $exception) {
-                die(var_dump($exception->getMessage()));
                 // TODO : implement error handling
             }
         }
