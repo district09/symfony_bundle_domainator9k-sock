@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -40,7 +39,7 @@ class SockServerFieldType extends AbstractFieldType
             $options['choices'][$virtualServer['hostname']] = $virtualServer['id'];
         }
 
-        $options['data'] = json_decode($value, true);
+        $options['data'] = $value;
 
         return $options;
     }
@@ -50,6 +49,6 @@ class SockServerFieldType extends AbstractFieldType
      */
     public static function getName(): string
     {
-        return 'socker_server';
+        return 'sock_server';
     }
 }

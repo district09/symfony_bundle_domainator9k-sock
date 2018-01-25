@@ -6,8 +6,8 @@ namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 use DigipolisGent\Domainator9k\CiTypes\JenkinsBundle\Entity\GroovyScript;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
-use DigipolisGent\SettingBundle\Entity\SettingDataValue;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
+use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
@@ -19,12 +19,17 @@ class SshKeyChoiceFieldType extends AbstractFieldType
 {
 
     private $apiService;
-    private $entityManager;
+    private $dataValueService;
 
-    public function __construct(ApiService $apiService, EntityManagerInterface $entityManager)
+    /**
+     * SshKeyChoiceFieldType constructor.
+     * @param ApiService $apiService
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(ApiService $apiService, DataValueService $dataValueService)
     {
         $this->apiService = $apiService;
-        $this->entityManager = $entityManager;
+        $this->dataValueService = $dataValueService;
     }
 
     /**
@@ -64,12 +69,7 @@ class SshKeyChoiceFieldType extends AbstractFieldType
         $originEntity = $this->getOriginEntity();
 
         if ($originEntity instanceof ApplicationEnvironment && is_null($originEntity->getId())) {
-            $settingDataValue = $this->entityManager->getRepository(SettingDataValue::class)
-                ->findOneByKey($originEntity->getEnvironment(), 'sock_ssh_key');
-
-            if ($settingDataValue) {
-                $options['data'] = json_decode($settingDataValue->getValue(), true);
-            }
+            $options['data'] = $this->dataValueService->getValue($originEntity->getEnvironment(), 'sock_ssh_key');
         }
 
         return $options;
@@ -84,6 +84,10 @@ class SshKeyChoiceFieldType extends AbstractFieldType
         return json_encode($value);
     }
 
+    /**
+     * @param $value
+     * @return mixed
+     */
     public function decodeValue($value)
     {
         return json_decode($value, true);

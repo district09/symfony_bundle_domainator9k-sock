@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\Service;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 
@@ -221,7 +220,8 @@ class ApiService
      */
     public function createApplication($accountId, $name, $aliases = array(), $documentrootSuffix = 'current')
     {
-        return $this->post('/applications',
+        return $this->post(
+            '/applications',
             [
                 'account_id' => $accountId,
                 'name' => $name,
@@ -261,7 +261,8 @@ class ApiService
      */
     public function createDatabase($accountId, $name, $username, $password)
     {
-        return $this->post('/databases',
+        return $this->post(
+            '/databases',
             [
                 'account_id' => $accountId,
                 'name' => $name,

@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\AbstractApplication;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +42,7 @@ class ParentApplicationFieldType extends AbstractFieldType
             }
         }
 
-        $options['data'] = json_decode($value, true);
+        $options['data'] = $value;
 
         return $options;
     }
@@ -54,15 +53,6 @@ class ParentApplicationFieldType extends AbstractFieldType
     public static function getName(): string
     {
         return 'parent_application';
-    }
-
-    /**
-     * @param $value
-     * @return string
-     */
-    public function encodeValue($value): string
-    {
-        return $value;
     }
 
     /**

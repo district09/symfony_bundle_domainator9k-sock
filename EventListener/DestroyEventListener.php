@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
@@ -52,7 +51,6 @@ class DestroyEventListener
         $servers = $this->entityManager->getRepository(Server::class)->findAll();
 
         foreach ($servers as $server) {
-
             try {
                 if ($server->getEnvironment() != $environment) {
                     continue;
@@ -65,6 +63,7 @@ class DestroyEventListener
                 }
 
                 $accountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
+
                 if ($accountId) {
                     $this->apiService->removeAccount($accountId);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
@@ -89,7 +88,6 @@ class DestroyEventListener
 
                 $this->entityManager->persist($applicationEnvironment);
                 $this->entityManager->flush();
-
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
                     sprintf(
@@ -100,7 +98,6 @@ class DestroyEventListener
 
                 continue;
             } catch (\Exception $exception) {
-                die(var_dump($exception->getMessage()));
                 // TODO : implement error handling
             }
         }

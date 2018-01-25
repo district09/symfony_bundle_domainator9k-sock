@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
-
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
@@ -53,7 +52,6 @@ class BuildEventListener
         $servers = $this->entityManager->getRepository(Server::class)->findAll();
 
         foreach ($servers as $server) {
-
             try {
                 if ($server->getEnvironment() != $environment) {
                     continue;
@@ -73,7 +71,6 @@ class BuildEventListener
                 }
 
                 $this->createSockDatabase($applicationEnvironment, $server);
-
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
                     sprintf(
@@ -84,7 +81,6 @@ class BuildEventListener
 
                 continue;
             } catch (\Exception $exception) {
-                die(var_dump($exception->getMessage()));
                 // TODO : implement error handling
             }
         }
@@ -94,10 +90,8 @@ class BuildEventListener
      * @param ApplicationEnvironment $applicationEnvironment
      * @param Server $server
      */
-    public function createSockAccount(
-        ApplicationEnvironment $applicationEnvironment,
-        Server $server
-    ) {
+    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, Server $server)
+    {
         $application = $applicationEnvironment->getApplication();
 
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
