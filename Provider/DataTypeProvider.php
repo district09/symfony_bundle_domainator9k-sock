@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\Provider;
 
-
 use DigipolisGent\SettingBundle\Provider\DataTypeProviderInterface;
 
 /**

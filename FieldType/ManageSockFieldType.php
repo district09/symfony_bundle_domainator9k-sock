@@ -78,5 +78,4 @@ class ManageSockFieldType extends BooleanFieldType
 
         return $options;
     }
-
 }

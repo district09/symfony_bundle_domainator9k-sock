@@ -52,7 +52,6 @@ class BuildEventListener
         $servers = $this->entityManager->getRepository(Server::class)->findAll();
 
         foreach ($servers as $server) {
-
             try {
                 if ($server->getEnvironment() != $environment) {
                     continue;
@@ -72,7 +71,6 @@ class BuildEventListener
                 }
 
                 $this->createSockDatabase($applicationEnvironment, $server);
-
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
                     sprintf(

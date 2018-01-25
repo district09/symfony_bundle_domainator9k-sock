@@ -51,7 +51,6 @@ class DestroyEventListener
         $servers = $this->entityManager->getRepository(Server::class)->findAll();
 
         foreach ($servers as $server) {
-
             try {
                 if ($server->getEnvironment() != $environment) {
                     continue;
@@ -89,7 +88,6 @@ class DestroyEventListener
 
                 $this->entityManager->persist($applicationEnvironment);
                 $this->entityManager->flush();
-
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
                     sprintf(
