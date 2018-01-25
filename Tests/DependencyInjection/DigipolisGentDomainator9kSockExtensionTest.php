@@ -57,7 +57,7 @@ class DigipolisGentDomainator9kSockExtensionTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('getDefinition')
             ->with($this->equalTo(ApiService::class))
             ->willReturn($apiServiceDefinition);

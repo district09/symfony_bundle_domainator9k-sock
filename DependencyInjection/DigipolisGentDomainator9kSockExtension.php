@@ -18,10 +18,10 @@ class DigipolisGentDomainator9kSockExtension extends Extension
 
     public function load(array $configs, ContainerBuilder $container)
     {
-        $definition = $container->getDefinition(ApiService::class);
-
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
+
+        $definition = $container->getDefinition(ApiService::class);
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
