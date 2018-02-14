@@ -89,7 +89,7 @@ class ParentApplicationFieldTypeTest extends TestCase
         $repository = $this->getApplicationRepositoryMock();
         $repository
             ->expects($this->at(0))
-            ->method('findAll')
+            ->method('findBy')
             ->willReturn($applications);
 
         $entityManager = $this->getEntityManagerMock();

@@ -35,7 +35,10 @@ class ParentApplicationFieldType extends AbstractFieldType
         $options['multiple'] = false;
         $options['expanded'] = false;
 
-        $applications = $this->entityManager->getRepository(AbstractApplication::class)->findAll();
+        $applications = $this->entityManager->getRepository(AbstractApplication::class)
+            ->findBy(['deleted' => false]
+            );
+
         foreach ($applications as $application) {
             if ($this->getOriginEntity()->getId() != $application->getId()) {
                 $options['choices'][$application->getName()] = $application->getId();
