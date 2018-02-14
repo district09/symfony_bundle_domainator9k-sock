@@ -5,7 +5,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
@@ -49,7 +49,7 @@ class BuildEventListener
         $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
-        $servers = $this->entityManager->getRepository(Server::class)->findAll();
+        $servers = $this->entityManager->getRepository(VirtualServer::class)->findAll();
 
         foreach ($servers as $server) {
             try {

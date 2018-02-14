@@ -5,8 +5,8 @@ namespace DigipolisGent\Domainator9k\SockBundle\Tests\EventListener;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
@@ -28,15 +28,15 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $servers = new ArrayCollection();
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($uatEnvironment);
         $servers->add($serverOne);
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($prodEnvironment);
         $servers->add($serverTwo);
 
-        $serverThree = new Server();
+        $serverThree = new VirtualServer();
         $serverThree->setEnvironment($prodEnvironment);
         $servers->add($serverThree);
 

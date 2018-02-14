@@ -4,7 +4,7 @@
 namespace DigipolisGent\Domainator9k\SockBundle\Tests\FieldType;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\SockBundle\FieldType\ManageSockFieldType;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -26,11 +26,11 @@ class ManageSockFieldTypeTest extends TestCase
         $environment = new Environment();
         $environment->setName('prod');
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($environment);
         $serverOne->setName('Server one');
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($environment);
         $serverTwo->setName('Server two');
 
@@ -84,7 +84,7 @@ class ManageSockFieldTypeTest extends TestCase
         $mock
             ->expects($this->at(0))
             ->method('getRepository')
-            ->with(Server::class)
+            ->with(VirtualServer::class)
             ->willReturn($serverRepository);
 
         return $mock;
@@ -119,11 +119,11 @@ class ManageSockFieldTypeTest extends TestCase
         $environment = new Environment();
         $environment->setName('prod');
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($environment);
         $serverOne->setName('Server one');
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($environment);
         $serverTwo->setName('Server two');
 

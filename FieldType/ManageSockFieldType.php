@@ -3,7 +3,7 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Server;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\SettingBundle\FieldType\BooleanFieldType;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,7 +54,7 @@ class ManageSockFieldType extends BooleanFieldType
 
                 $currentServer = $this->getOriginEntity();
 
-                $serverRepository = $this->entityManager->getRepository(Server::class);
+                $serverRepository = $this->entityManager->getRepository(VirtualServer::class);
                 $servers = $serverRepository->findBy(['environment' => $currentServer->getEnvironment()]);
 
                 foreach ($servers as $server) {
