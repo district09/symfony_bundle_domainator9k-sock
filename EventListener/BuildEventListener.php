@@ -90,7 +90,7 @@ class BuildEventListener
      * @param ApplicationEnvironment $applicationEnvironment
      * @param Server $server
      */
-    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, Server $server)
+    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, VirtualServer $server)
     {
         $application = $applicationEnvironment->getApplication();
 
