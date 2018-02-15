@@ -90,6 +90,11 @@ class SshKeyChoiceFieldType extends AbstractFieldType
      */
     public function decodeValue($value)
     {
-        return json_decode($value, true);
+        $decodedValue = json_decode($value, true);
+        if (!is_array($decodedValue)) {
+            return [];
+        }
+
+        return $decodedValue;
     }
 }
