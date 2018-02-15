@@ -101,7 +101,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
-        $server = new Server();
+        $server = new VirtualServer();
 
         $parentApplication = new FooApplication();
 
@@ -148,7 +148,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
-        $server = new Server();
+        $server = new VirtualServer();
 
 
         $entityManagerFunctions = [
@@ -219,16 +219,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
 
-        $parentApplication = new FooApplication();
-
         $entityManagerFunctions = [
         ];
 
         $dataValueServiceFunctions = [
-            [
-                'method' => 'getValue',
-                'willReturn' => $parentApplication,
-            ],
             [
                 'method' => 'getValue',
                 'willReturn' => 4,
@@ -275,8 +269,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
         $applicationEnvironment->setEnvironment($environment);
-
-        $parentApplication = new FooApplication();
 
         $entityManagerFunctions = [
             [
@@ -357,15 +349,15 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $servers = new ArrayCollection();
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($uatEnvironment);
         $servers->add($serverOne);
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($prodEnvironment);
         $servers->add($serverTwo);
 
-        $serverThree = new Server();
+        $serverThree = new VirtualServer();
         $serverThree->setEnvironment($prodEnvironment);
         $servers->add($serverThree);
 
@@ -432,15 +424,15 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $servers = new ArrayCollection();
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($uatEnvironment);
         $servers->add($serverOne);
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($prodEnvironment);
         $servers->add($serverTwo);
 
-        $serverThree = new Server();
+        $serverThree = new VirtualServer();
         $serverThree->setEnvironment($prodEnvironment);
         $servers->add($serverThree);
 

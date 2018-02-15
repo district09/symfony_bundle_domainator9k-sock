@@ -149,15 +149,15 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
 
         $servers = new ArrayCollection();
 
-        $serverOne = new Server();
+        $serverOne = new VirtualServer();
         $serverOne->setEnvironment($uatEnvironment);
         $servers->add($serverOne);
 
-        $serverTwo = new Server();
+        $serverTwo = new VirtualServer();
         $serverTwo->setEnvironment($prodEnvironment);
         $servers->add($serverTwo);
 
-        $serverThree = new Server();
+        $serverThree = new VirtualServer();
         $serverThree->setEnvironment($prodEnvironment);
         $servers->add($serverThree);
 

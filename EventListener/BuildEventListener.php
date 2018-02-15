@@ -90,7 +90,7 @@ class BuildEventListener
      * @param ApplicationEnvironment $applicationEnvironment
      * @param Server $server
      */
-    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, Server $server)
+    public function createSockAccount(ApplicationEnvironment $applicationEnvironment, VirtualServer $server)
     {
         $application = $applicationEnvironment->getApplication();
 
@@ -142,16 +142,12 @@ class BuildEventListener
     {
         $application = $applicationEnvironment->getApplication();
 
-        $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
         $sockAccountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
 
         // Check if the account exists
         $this->apiService->getAccount($sockAccountId);
 
-        $applicationName = 'default';
-        if ($parentApplication) {
-            $applicationName = $parentApplication->getNameCanonical();
-        }
+        $applicationName = $application->getNameCanonical();
 
         $this->taskLoggerService->addLine(sprintf(
             'requesting application "%s" for Sock Account %s',
