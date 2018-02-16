@@ -10,7 +10,7 @@
     "php": ">=7.1",
     "symfony/symfony": ">=3.4",
     "doctrine/orm": "^2.5",
-    "digipolisgent/domainator9k-core-bundle": "dev-develop",
+    "digipolisgent/domainator9k-core-bundle": "^1.0.0@alpha",
     "guzzlehttp/guzzle": "^6.3"
   },
   "require-dev": {
