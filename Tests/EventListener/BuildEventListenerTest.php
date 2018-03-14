@@ -213,6 +213,76 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $listener->createSockAccount($applicationEnvironment, $server);
     }
 
+    public function testCreateExistingSockAccount()
+    {
+        $application = new FooApplication();
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setApplication($application);
+        $server = new VirtualServer();
+
+
+        $entityManagerFunctions = [
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => false,
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => 1,
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                ]
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null,
+            ],
+        ];
+
+        $account = ['id' => uniqid()];
+
+        $apiServiceFunctions = [
+            [
+                'method' => 'getVirtualServer',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'findAccountByName',
+                'willReturn' => $account,
+            ],
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $apiService->expects($this->never())->method('createAccount');
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+
+        $listener = new BuildEventListener(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager
+        );
+
+        $listener->createSockAccount($applicationEnvironment, $server);
+    }
+
     public function testCreateSockApplication()
     {
         $application = new FooApplication();
@@ -249,6 +319,51 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+
+        $listener = new BuildEventListener(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager
+        );
+
+        $listener->createSockApplication($applicationEnvironment);
+    }
+
+    public function testCreateExistingSockApplication()
+    {
+        $application = new FooApplication();
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setApplication($application);
+
+        $entityManagerFunctions = [
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => 4,
+            ],
+        ];
+
+        $application = ['id' => uniqid()];
+
+        $apiServiceFunctions = [
+            [
+                'method' => 'getAccount',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'findApplicationByName',
+                'willReturn' => $application,
+            ],
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $apiService->expects($this->never())->method('createApplication');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $listener = new BuildEventListener(
@@ -325,6 +440,81 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+
+        $listener = new BuildEventListener(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager
+        );
+
+        $listener->createSockDatabase($applicationEnvironment);
+    }
+
+    public function testCreateExistingSockDatabase()
+    {
+        $application = new FooApplication();
+        $environment = new Environment();
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setApplication($application);
+        $applicationEnvironment->setEnvironment($environment);
+
+        $entityManagerFunctions = [
+            [
+                'method' => 'persist',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => 1,
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null,
+            ],
+        ];
+
+        $database = [
+            'id' => uniqid(),
+            'database_grants' => [
+                0 => [
+                    'login' => 'my-login'
+                ]
+            ]
+        ];
+
+        $apiServiceFunctions = [
+            [
+                'method' => 'getAccount',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'findDatabaseByName',
+                'willReturn' => $database,
+            ],
+            [
+                'method' => 'removeDatabaseLogin',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'addDatabaseLogin',
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $apiService->expects($this->never())->method('createDatabase');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $listener = new BuildEventListener(
