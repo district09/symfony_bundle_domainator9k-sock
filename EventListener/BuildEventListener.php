@@ -163,7 +163,7 @@ class BuildEventListener
         $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
 
         $application
-            ? $this->taskLoggerService->addLine(sprintf('Application "%s" for sock account %s found as sock application with id %s.', $applicationName, $sockAccountId $application['id']))
+            ? $this->taskLoggerService->addLine(sprintf('Application "%s" for sock account %s found as sock application with id %s.', $applicationName, $sockAccountId, $application['id']))
             : $this->taskLoggerService->addLine(sprintf('Application "%s" for sock account %s not found, we\'ll have to create one.', $applicationName, $sockAccountId));
 
         if (!$application) {
