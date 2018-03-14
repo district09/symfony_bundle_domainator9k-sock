@@ -218,7 +218,13 @@ class ApiService
      * @param string $documentrootSuffix
      * @return mixed
      */
-    public function createApplication($accountId, $name, $aliases = array(), $documentrootSuffix = 'current', $technology = 'php-fpm')
+    public function createApplication(
+        $accountId,
+        $name,
+        $aliases = array(),
+        $documentrootSuffix = 'current',
+        $technology = 'php-fpm'
+    )
     {
         return $this->post(
             '/applications',

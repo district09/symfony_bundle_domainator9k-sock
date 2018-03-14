@@ -148,7 +148,7 @@ class BuildEventListener
         $this->apiService->getAccount($sockAccountId);
 
         $applicationName = $application->getNameCanonical();
-        $technology = $sockServerId = $this->dataValueService->getValue($application, 'sock_application_technology');
+        $technology = $this->dataValueService->getValue($application, 'sock_application_technology');
 
         $this->taskLoggerService->addLine(sprintf(
             'requesting application "%s" for Sock Account %s',
