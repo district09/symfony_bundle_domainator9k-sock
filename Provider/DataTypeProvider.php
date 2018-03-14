@@ -80,6 +80,14 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'entity_types' => ['application'],
                 'order' => 5
             ],
+            [
+                'key' => 'sock_application_technology',
+                'label' => 'Sock application technology',
+                'required' => true,
+                'field_type' => 'sock_technology',
+                'entity_types' => ['application'],
+                'order' => 6,
+            ],
         ];
     }
 }

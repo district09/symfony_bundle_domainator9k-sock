@@ -158,6 +158,7 @@ class BuildEventListener
         $this->apiService->getAccount($sockAccountId);
 
         $applicationName = $application->getNameCanonical();
+        $technology = $this->dataValueService->getValue($application, 'sock_application_technology');
 
         $this->taskLoggerService->addLine(sprintf(
             'Requesting application "%s" for Sock Account %s.',
@@ -184,7 +185,9 @@ class BuildEventListener
             $application = $this->apiService->createApplication(
                 $sockAccountId,
                 $applicationName,
-                [$applicationEnvironment->getDomain()]
+                [$applicationEnvironment->getDomain()],
+                'current',
+                $technology ? $technology : 'php-fpm'
             );
 
             $this->taskLoggerService->addLine(sprintf(
