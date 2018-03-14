@@ -224,8 +224,7 @@ class ApiService
         $aliases = array(),
         $documentrootSuffix = 'current',
         $technology = 'php-fpm'
-    )
-    {
+    ) {
         return $this->post(
             '/applications',
             [
