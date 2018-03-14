@@ -97,12 +97,12 @@ class BuildEventListener
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
         $sockServerId = $this->dataValueService->getValue($server, 'sock_server_id');
 
-        // Check if the server exists
+        // Check if the server exists.
         $this->apiService->getVirtualServer($sockServerId);
 
         if ($parentApplication) {
             $this->taskLoggerService->addLine(sprintf(
-                'using existing account "%s" as parent on Sock Virtual Server %s',
+                'Using existing account "%s" as parent on Sock Virtual Server %s.',
                 $parentApplication->getName(),
                 $sockServerId
             ));
@@ -113,7 +113,7 @@ class BuildEventListener
         $username = $application->getNameCanonical();
 
         $this->taskLoggerService->addLine(sprintf(
-            'requesting account "%s" on Sock Virtual Server %s',
+            'Requesting account "%s" on Sock Virtual Server %s.',
             $username,
             $sockServerId
         ));
@@ -121,14 +121,19 @@ class BuildEventListener
         $account = $this->apiService->findAccountByName($username, $sockServerId);
         $sshKeyIds = $this->dataValueService->getValue($applicationEnvironment, 'sock_ssh_key');
 
+        $account
+            ? $this->taskLoggerService->addLine(sprintf('Account "%s" found as sock account with id %s.', $username, $account['id']))
+            : $this->taskLoggerService->addLine(sprintf('Account "%s" not found, we\'ll have to create one.', $username));
+
         if (!$account) {
+            $account = $this->apiService->createAccount($username, $sockServerId, $sshKeyIds);
+
             $this->taskLoggerService->addLine(sprintf(
-                'account "%s" created on Sock Virtual Server %s',
+                'Account "%s" with id %s created on Sock Virtual Server %s.',
                 $username,
+                $account['id'],
                 $sockServerId
             ));
-
-            $account = $this->apiService->createAccount($username, $sockServerId, $sshKeyIds);
         }
 
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $account['id']);
@@ -144,31 +149,35 @@ class BuildEventListener
 
         $sockAccountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
 
-        // Check if the account exists
+        // Check if the account exists.
         $this->apiService->getAccount($sockAccountId);
 
         $applicationName = $application->getNameCanonical();
 
         $this->taskLoggerService->addLine(sprintf(
-            'requesting application "%s" for Sock Account %s',
+            'Requesting application "%s" for Sock Account %s.',
             $applicationName,
             $sockAccountId
         ));
 
         $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
 
-        if (!$application) {
-            $this->taskLoggerService->addLine(sprintf(
-                'application "%s" created on for Sock Account %s',
-                $applicationName,
-                $sockAccountId
-            ));
+        $application
+            ? $this->taskLoggerService->addLine(sprintf('Application "%s" for sock account %s found as sock application with id %s.', $applicationName, $sockAccountId $application['id']))
+            : $this->taskLoggerService->addLine(sprintf('Application "%s" for sock account %s not found, we\'ll have to create one.', $applicationName, $sockAccountId));
 
+        if (!$application) {
             $application = $this->apiService->createApplication(
                 $sockAccountId,
                 $applicationName,
                 [$applicationEnvironment->getDomain()]
             );
+
+            $this->taskLoggerService->addLine(sprintf(
+                'Application "%s" created on for Sock Account %s.',
+                $applicationName,
+                $sockAccountId
+            ));
         }
 
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $application['id']);
@@ -207,7 +216,7 @@ class BuildEventListener
         $this->apiService->getAccount($sockAccountId);
 
         $this->taskLoggerService->addLine(sprintf(
-            'requesting database "%s" for Sock Account %s',
+            'Requesting database "%s" for Sock Account %s.',
             $databaseName,
             $sockAccountId
         ));
@@ -215,18 +224,18 @@ class BuildEventListener
         $database = $this->apiService->findDatabaseByName($databaseName, $sockAccountId);
 
         if (!$database) {
-            $this->taskLoggerService->addLine(sprintf(
-                'database "%s" created on for Sock Account %s',
-                $databaseName,
-                $sockAccountId
-            ));
-
             $database = $this->apiService->createDatabase(
                 $sockAccountId,
                 $databaseName,
                 $databaseUser,
                 $databasePassword
             );
+
+            $this->taskLoggerService->addLine(sprintf(
+                'Database "%s" created on for Sock Account %s.',
+                $databaseName,
+                $sockAccountId
+            ));
         }
 
         $login = $database['database_grants'][0]['login'];

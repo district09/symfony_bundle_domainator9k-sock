@@ -67,12 +67,14 @@ class DestroyEventListener
                 if ($accountId) {
                     $this->apiService->removeAccount($accountId);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
+                    $this->taskLoggerService->addLine(sprintf('Removed sock account %s.', $accountId));
                 }
 
                 $applicationId = $this->dataValueService->getValue($applicationEnvironment, 'sock_application_id');
                 if ($applicationId) {
                     $this->apiService->removeApplication($applicationId);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
+                    $this->taskLoggerService->addLine(sprintf('Removed sock application %s.', $applicationId));
                 }
 
                 $databaseId = $this->dataValueService->getValue($applicationEnvironment, 'sock_database_id');
@@ -80,6 +82,7 @@ class DestroyEventListener
                     $this->apiService->removeDatabase($databaseId);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
                     $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', null);
+                    $this->taskLoggerService->addLine(sprintf('Removed sock database %s.', $databaseId));
                 }
 
                 $applicationEnvironment->setDatabaseUser(null);
