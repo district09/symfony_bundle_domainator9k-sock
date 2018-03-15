@@ -5,6 +5,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
@@ -46,6 +47,10 @@ class BuildEventListener
      */
     public function onBuild(BuildEvent $event)
     {
+        if ($event->getTask()->getStatus() == Task::STATUS_FAILED) {
+            return;
+        }
+
         $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
@@ -64,7 +69,7 @@ class BuildEventListener
                 }
 
                 $this->createSockAccount($applicationEnvironment, $server);
-                $this->createSockApplication($applicationEnvironment);
+                $this->createSockApplication($applicationEnvironment);https://digipolisgent.slack.com/messages/D7VDRJQ66
 
                 if (!$applicationEnvironment->getApplication()->isHasDatabase()) {
                     continue;
@@ -72,6 +77,7 @@ class BuildEventListener
 
                 $this->createSockDatabase($applicationEnvironment, $server);
             } catch (ClientException $exception) {
+
                 $this->taskLoggerService->addLine(
                     sprintf(
                         'Error on updating sock with message "%s"',
@@ -79,9 +85,10 @@ class BuildEventListener
                     )
                 );
 
-                continue;
+                $this->taskLoggerService->endTask();
+                return;
             } catch (\Exception $exception) {
-                // TODO : implement error handling
+                $this->taskLoggerService->endTask();
             }
         }
     }
@@ -122,14 +129,14 @@ class BuildEventListener
 
         $account
             ? $this->taskLoggerService->addLine(sprintf(
-                'Account "%s" found as sock account with id %s.',
-                $username,
-                $account['id']
-            ))
+            'Account "%s" found as sock account with id %s.',
+            $username,
+            $account['id']
+        ))
             : $this->taskLoggerService->addLine(sprintf(
-                'Account "%s" not found, we\'ll have to create one.',
-                $username
-            ));
+            'Account "%s" not found, we\'ll have to create one.',
+            $username
+        ));
 
         if (!$account) {
             $account = $this->apiService->createAccount($username, $sockServerId, $sshKeyIds);
@@ -170,16 +177,16 @@ class BuildEventListener
 
         $application
             ? $this->taskLoggerService->addLine(sprintf(
-                'Application "%s" for sock account %s found as sock application with id %s.',
-                $applicationName,
-                $sockAccountId,
-                $application['id']
-            ))
+            'Application "%s" for sock account %s found as sock application with id %s.',
+            $applicationName,
+            $sockAccountId,
+            $application['id']
+        ))
             : $this->taskLoggerService->addLine(sprintf(
-                'Application "%s" for sock account %s not found, we\'ll have to create one.',
-                $applicationName,
-                $sockAccountId
-            ));
+            'Application "%s" for sock account %s not found, we\'ll have to create one.',
+            $applicationName,
+            $sockAccountId
+        ));
 
         if (!$application) {
             $application = $this->apiService->createApplication(
@@ -242,16 +249,16 @@ class BuildEventListener
 
         $database
             ? $this->taskLoggerService->addLine(sprintf(
-                'Database "%s" for sock account %s found as sock database with id %s.',
-                $databaseName,
-                $sockAccountId,
-                $database['id']
-            ))
+            'Database "%s" for sock account %s found as sock database with id %s.',
+            $databaseName,
+            $sockAccountId,
+            $database['id']
+        ))
             : $this->taskLoggerService->addLine(sprintf(
-                'Database "%s" for sock account %s not found, we\'ll have to create one.',
-                $databaseName,
-                $sockAccountId
-            ));
+            'Database "%s" for sock account %s not found, we\'ll have to create one.',
+            $databaseName,
+            $sockAccountId
+        ));
 
         if (!$database) {
             $database = $this->apiService->createDatabase(
