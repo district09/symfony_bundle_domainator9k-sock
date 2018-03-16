@@ -87,6 +87,7 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'field_type' => 'sock_technology',
                 'entity_types' => ['application'],
                 'order' => 6,
+                'default_value' => 'php-fpm',
             ],
         ];
     }
