@@ -69,7 +69,8 @@ class BuildEventListener
                 }
 
                 $this->createSockAccount($applicationEnvironment, $server);
-                $this->createSockApplication($applicationEnvironment);https://digipolisgent.slack.com/messages/D7VDRJQ66
+                $this->createSockApplication($applicationEnvironment);
+                https://digipolisgent.slack.com/messages/D7VDRJQ66
 
                 if (!$applicationEnvironment->getApplication()->isHasDatabase()) {
                     continue;
@@ -148,8 +149,18 @@ class BuildEventListener
             ));
         }
 
-        $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $account['id']);
+        $sockAccountId = $account['id'];
+
+        $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $sockAccountId);
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
+
+        $this->taskLoggerService->addLine('Polling');
+        // Implemented polling
+        $events = $this->apiService->getEvents('accounts', $sockAccountId);
+        while (count($events)) {
+            $events = $this->apiService->getEvents('accounts', $sockAccountId);
+            sleep(5);
+        }
     }
 
     /**
@@ -204,7 +215,17 @@ class BuildEventListener
             ));
         }
 
-        $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $application['id']);
+        $applicationId = $application['id'];
+
+        $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $applicationId);
+
+        $this->taskLoggerService->addLine('Polling');
+        // Implemented polling
+        $events = $this->apiService->getEvents('applications', $applicationId);
+        while (count($events)) {
+            $events = $this->apiService->getEvents('applications', $applicationId);
+            sleep(5);
+        }
     }
 
     /**
@@ -280,7 +301,9 @@ class BuildEventListener
         $this->apiService->removeDatabaseLogin($database['id'], $login);
         $this->apiService->addDatabaseLogin($database['id'], $databaseUser, $databasePassword);
 
-        $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', $database['id']);
+        $databaseId = $database['id'];
+
+        $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', $databaseId);
 
         $applicationEnvironment->setDatabaseUser($databaseUser);
         $applicationEnvironment->setDatabaseName($databaseName);
@@ -288,5 +311,13 @@ class BuildEventListener
 
         $this->entityManager->persist($applicationEnvironment);
         $this->entityManager->flush();
+
+        $this->taskLoggerService->addLine('Polling');
+        // Implemented polling
+        $events = $this->apiService->getEvents('databases', $databaseId);
+        while (count($events)) {
+            $events = $this->apiService->getEvents('databases', $databaseId);
+            sleep(5);
+        }
     }
 }

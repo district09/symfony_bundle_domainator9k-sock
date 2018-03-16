@@ -327,4 +327,14 @@ class ApiService
     {
         $this->delete('/databases/' . $databaseId);
     }
+
+    /**
+     * @param $name
+     * @param $serverId
+     * @return mixed
+     */
+    public function getEvents($type, $id)
+    {
+        return $this->get('/'.$type.'/'.$id.'/events');
+    }
 }
