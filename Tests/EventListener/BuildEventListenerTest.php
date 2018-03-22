@@ -196,6 +196,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'createAccount',
                 'willReturn' => null,
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -265,6 +269,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'findAccountByName',
                 'willReturn' => $account,
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -314,6 +322,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                     'id' => 10
                 ],
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -358,6 +370,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'findApplicationByName',
                 'willReturn' => $application,
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -435,6 +451,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -509,6 +529,10 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
+            [
+                'method' => 'getEvents',
+                'willReturn' => [],
+            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);

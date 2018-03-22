@@ -31,4 +31,8 @@ services:
         public: true
         tags:
             - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\DatabaseHostFieldType:
+        public: true
+        tags:
+            - { name: field_type}
     DigipolisGent\Domainator9k\SockBundle\Service\ApiService:

@@ -89,6 +89,13 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'order' => 6,
                 'default_value' => 'php-fpm',
             ],
+            [
+                'key' => 'database_host',
+                'label' => 'Database host',
+                'required' => true,
+                'field_type' => 'database_host',
+                'entity_types' => ['environment','application_environment'],
+            ],
         ];
     }
 }
