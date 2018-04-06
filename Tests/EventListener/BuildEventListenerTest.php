@@ -107,12 +107,24 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
 
         $entityManagerFunctions = [
+            [
+                'method' => 'getRepository',
+                'willReturn' => $this->getRepositoryMock('findOneBy', new FooApplication()),
+            ]
         ];
 
         $dataValueServiceFunctions = [
             [
                 'method' => 'getValue',
                 'willReturn' => $parentApplication
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => 1
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => 'username'
             ],
             [
                 'method' => 'getValue',

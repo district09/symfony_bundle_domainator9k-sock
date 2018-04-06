@@ -107,6 +107,23 @@ class BuildEventListener
         $this->apiService->getVirtualServer($sockServerId);
 
         if ($parentApplication) {
+            $environment = $applicationEnvironment->getEnvironment();
+            $parentApplicationEnvironment = $this->entityManager
+                ->getRepository(ApplicationEnvironment::class)
+                ->findOneBy(['application' => $parentApplication,'environment' => $environment]);
+
+            $sockAccountId = $this->dataValueService->getValue($parentApplicationEnvironment,'sock_account_id');
+            $username = $this->dataValueService->getValue($parentApplicationEnvironment,'sock_ssh_user');
+
+            if(!$sockAccountId || !$username){
+                $this->taskLoggerService->addLine(sprintf(
+                    'The parent application was never build, the sock account is not available yet.'));
+                throw new \Exception('The parent application was never build, the sock account is not available yet.');
+            }
+
+            $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $sockAccountId);
+            $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
+
             $this->taskLoggerService->addLine(sprintf(
                 'Using existing account "%s" as parent on Sock Virtual Server %s.',
                 $parentApplication->getName(),
