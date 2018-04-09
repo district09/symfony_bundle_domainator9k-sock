@@ -89,6 +89,10 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
             ],
             [
                 'method' => 'getValue',
+                'willReturn' => null
+            ],
+            [
+                'method' => 'getValue',
                 'willReturn' => 8
             ],
             [
