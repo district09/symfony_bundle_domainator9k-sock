@@ -57,17 +57,16 @@ class DestroyEventListener
                 }
 
                 $manageSock = $this->dataValueService->getValue($server, 'manage_sock');
-
                 if (!$manageSock) {
                     continue;
                 }
 
-                $accountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
-
-                if ($accountId) {
-                    $this->apiService->removeAccount($accountId);
-                    $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
-                    $this->taskLoggerService->addLine(sprintf('Removed sock account %s.', $accountId));
+                $databaseId = $this->dataValueService->getValue($applicationEnvironment, 'sock_database_id');
+                if ($databaseId) {
+                    $this->apiService->removeDatabase($databaseId);
+                    $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
+                    $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', null);
+                    $this->taskLoggerService->addLine(sprintf('Removed sock database %s.', $databaseId));
                 }
 
                 $applicationId = $this->dataValueService->getValue($applicationEnvironment, 'sock_application_id');
@@ -77,12 +76,16 @@ class DestroyEventListener
                     $this->taskLoggerService->addLine(sprintf('Removed sock application %s.', $applicationId));
                 }
 
-                $databaseId = $this->dataValueService->getValue($applicationEnvironment, 'sock_database_id');
-                if ($databaseId) {
-                    $this->apiService->removeDatabase($databaseId);
-                    $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
-                    $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', null);
-                    $this->taskLoggerService->addLine(sprintf('Removed sock database %s.', $databaseId));
+                $application = $applicationEnvironment->getApplication();
+                $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
+                if (!$parentApplication) {
+                    // Only delete the account if this has no parent application.
+                    $accountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
+                    if ($accountId) {
+                        $this->apiService->removeAccount($accountId);
+                        $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
+                        $this->taskLoggerService->addLine(sprintf('Removed sock account %s.', $accountId));
+                    }
                 }
 
                 $applicationEnvironment->setDatabaseUser(null);
