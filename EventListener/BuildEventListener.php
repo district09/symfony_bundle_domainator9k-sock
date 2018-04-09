@@ -269,7 +269,7 @@ class BuildEventListener
             $databasePassword = substr(str_shuffle($chars), 0, 15);
         }
 
-        $databaseUser = substr($databaseUser, 0, 15);
+        $databaseUser = substr($databaseUser, 0, 16);
 
         $sockAccountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
 
