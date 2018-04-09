@@ -46,8 +46,8 @@ class DestroyEventListener
      */
     public function onDestroy(DestroyEvent $event)
     {
-        $applicationEnvironment = $event->getTask()->getApplicationEnvironment();
-        $environment = $applicationEnvironment->getEnvironment();
+        $appEnv = $event->getTask()->getApplicationEnvironment();
+        $environment = $appEnv->getEnvironment();
 
         $servers = $this->entityManager->getRepository(VirtualServer::class)->findAll();
 
@@ -62,15 +62,15 @@ class DestroyEventListener
                     continue;
                 }
 
-                $this->destroySockDatabase($applicationEnvironment);
+                $this->destroySockDatabase($appEnv);
                 $this->destroySockApplication();
-                $this->destroySockAccount($applicationEnvironment);
+                $this->destroySockAccount($appEnv);
 
-                $applicationEnvironment->setDatabaseUser(null);
-                $applicationEnvironment->setDatabaseName(null);
-                $applicationEnvironment->setDatabasePassword(null);
+                $appEnv->setDatabaseUser(null);
+                $appEnv->setDatabaseName(null);
+                $appEnv->setDatabasePassword(null);
 
-                $this->entityManager->persist($applicationEnvironment);
+                $this->entityManager->persist($appEnv);
                 $this->entityManager->flush();
             } catch (ClientException $exception) {
                 $this->taskLoggerService->addLine(
@@ -90,63 +90,63 @@ class DestroyEventListener
     /**
      * Destroy a sock database for a specific application environment.
      *
-     * @param ApplicationEnvironment $applicationEnvironment
+     * @param ApplicationEnvironment $appEnv
      *   The application environment to destroy the database for.
      *
      * @throws ClientException
      *   When something goes wrong while destroying the database.
      */
-    protected function destroySockDatabase(ApplicationEnvironment $applicationEnvironment)
+    protected function destroySockDatabase(ApplicationEnvironment $appEnv)
     {
-        $databaseId = $this->dataValueService->getValue($applicationEnvironment, 'sock_database_id');
+        $databaseId = $this->dataValueService->getValue($appEnv, 'sock_database_id');
         if (!$databaseId) {
             return;
         }
         $this->apiService->removeDatabase($databaseId);
-        $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
-        $this->dataValueService->storeValue($applicationEnvironment, 'sock_database_id', null);
+        $this->dataValueService->storeValue($appEnv, 'sock_application_id', null);
+        $this->dataValueService->storeValue($appEnv, 'sock_database_id', null);
         $this->taskLoggerService->addLine(sprintf('Removed sock database %s.', $databaseId));
     }
 
     /**
      * Destroy a sock application for a specific application environment.
      *
-     * @param ApplicationEnvironment $applicationEnvironment
+     * @param ApplicationEnvironment $appEnv
      *   The application environment to destroy the application for.
      *
      * @throws ClientException
      *   When something goes wrong while destroying the application.
      */
-    protected function destroySockApplication(ApplicationEnvironment $applicationEnvironment)
+    protected function destroySockApplication(ApplicationEnvironment $appEnv)
     {
-      $applicationId = $this->dataValueService->getValue($applicationEnvironment, 'sock_application_id');
-      if (!$applicationId) {
-          return;
-      }
-      $this->apiService->removeApplication($applicationId);
-      $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', null);
-      $this->taskLoggerService->addLine(sprintf('Removed sock application %s.', $applicationId));
+        $applicationId = $this->dataValueService->getValue($appEnv, 'sock_application_id');
+        if (!$applicationId) {
+            return;
+        }
+        $this->apiService->removeApplication($applicationId);
+        $this->dataValueService->storeValue($appEnv, 'sock_application_id', null);
+        $this->taskLoggerService->addLine(sprintf('Removed sock application %s.', $applicationId));
     }
 
     /**
      * Destroy a sock account for a specific application environment.
      *
-     * @param ApplicationEnvironment $applicationEnvironment
+     * @param ApplicationEnvironment $appEnv
      *   The application environment to destroy the account for.
      *
      * @throws ClientException
      *   When something goes wrong while destroying the account.
      */
-    protected function destroySockAccount(ApplicationEnvironment $applicationEnvironment)
+    protected function destroySockAccount(ApplicationEnvironment $appEnv)
     {
-        $application = $applicationEnvironment->getApplication();
+        $application = $appEnv->getApplication();
         $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
         // Only delete the account if this has no parent application.
         if (!$parentApplication) {
-            $accountId = $this->dataValueService->getValue($applicationEnvironment, 'sock_account_id');
+            $accountId = $this->dataValueService->getValue($appEnv, 'sock_account_id');
             if ($accountId) {
                 $this->apiService->removeAccount($accountId);
-                $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', null);
+                $this->dataValueService->storeValue($appEnv, 'sock_account_id', null);
                 $this->taskLoggerService->addLine(sprintf('Removed sock account %s.', $accountId));
             }
         }
