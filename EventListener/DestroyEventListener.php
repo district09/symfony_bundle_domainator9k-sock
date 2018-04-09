@@ -66,9 +66,6 @@ class DestroyEventListener
                 $this->destroySockApplication($appEnv);
                 $this->destroySockAccount($appEnv);
 
-                $appEnv->setDatabaseUser(null);
-                $appEnv->setDatabaseName(null);
-                $appEnv->setDatabasePassword(null);
 
                 $this->entityManager->persist($appEnv);
                 $this->entityManager->flush();
@@ -103,8 +100,10 @@ class DestroyEventListener
             return;
         }
         $this->apiService->removeDatabase($databaseId);
-        $this->dataValueService->storeValue($appEnv, 'sock_application_id', null);
         $this->dataValueService->storeValue($appEnv, 'sock_database_id', null);
+        $appEnv->setDatabaseUser(null);
+        $appEnv->setDatabaseName(null);
+        $appEnv->setDatabasePassword(null);
         $this->taskLoggerService->addLine(sprintf('Removed sock database %s.', $databaseId));
     }
 
@@ -147,6 +146,7 @@ class DestroyEventListener
             if ($accountId) {
                 $this->apiService->removeAccount($accountId);
                 $this->dataValueService->storeValue($appEnv, 'sock_account_id', null);
+                $this->dataValueService->storeValue($appEnv, 'sock_ssh_user', null);
                 $this->taskLoggerService->addLine(sprintf('Removed sock account %s.', $accountId));
             }
         }
