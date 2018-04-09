@@ -5,6 +5,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 /**
@@ -14,11 +15,26 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 class SockServerFieldType extends AbstractFieldType
 {
 
+    /**
+     * @var ApiService
+     */
     private $apiService;
 
-    public function __construct(ApiService $apiService)
+    /**
+     * @var CacheItemPoolInterface
+     */
+    private $cache;
+
+    /**
+     * Cache lifetime (one week).
+     * @var int
+     */
+    const CACHE_LIFETIME = 60 * 60 * 24 * 7;
+
+    public function __construct(ApiService $apiService, CacheItemPoolInterface $cache)
     {
         $this->apiService = $apiService;
+        $this->cache = $cache;
     }
 
 
@@ -34,7 +50,7 @@ class SockServerFieldType extends AbstractFieldType
         $options['multiple'] = false;
         $options['expanded'] = false;
 
-        $virtualServers = $this->apiService->getVirtualServers();
+        $virtualServers = $this->getVirtualServers();
         foreach ($virtualServers as $virtualServer) {
             $options['choices'][$virtualServer['hostname']] = $virtualServer['id'];
         }
@@ -42,6 +58,17 @@ class SockServerFieldType extends AbstractFieldType
         $options['data'] = $value;
 
         return $options;
+    }
+
+    protected function getVirtualServers()
+    {
+        $virtualServers = $this->cache->getItem('sock.virtual_servers');
+        if (!$virtualServers->isHit()) {
+            $virtualServers->set($this->apiService->getVirtualServers());
+            $virtualServers->expiresAfter(self::CACHE_LIFETIME);
+            $this->cache->save($virtualServers);
+        }
+        return $virtualServers->get();
     }
 
     /**
