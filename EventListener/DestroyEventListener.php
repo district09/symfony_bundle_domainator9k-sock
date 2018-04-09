@@ -63,7 +63,7 @@ class DestroyEventListener
                 }
 
                 $this->destroySockDatabase($appEnv);
-                $this->destroySockApplication();
+                $this->destroySockApplication($appEnv);
                 $this->destroySockAccount($appEnv);
 
                 $appEnv->setDatabaseUser(null);
