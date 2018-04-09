@@ -62,7 +62,7 @@ class SockServerFieldType extends AbstractFieldType
 
     protected function getVirtualServers()
     {
-        $virtualServers = $this->cache->get('sock.virtual_servers');
+        $virtualServers = $this->cache->getItem('sock.virtual_servers');
         if (!$virtualServers->isHit()) {
             $virtualServers->set($this->apiService->getVirtualServers());
             $virtualServers->expiresAfter(self::CACHE_LIFETIME);
