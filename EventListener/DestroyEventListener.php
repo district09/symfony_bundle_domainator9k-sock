@@ -48,6 +48,8 @@ class DestroyEventListener
     {
         $appEnv = $event->getTask()->getApplicationEnvironment();
         $environment = $appEnv->getEnvironment();
+        $application = $appEnv->getApplication();
+        $parentApplication = $this->dataValueService->getValue($application, 'parent_application');
 
         $servers = $this->entityManager->getRepository(VirtualServer::class)->findAll();
 
@@ -64,8 +66,10 @@ class DestroyEventListener
 
                 $this->destroySockDatabase($appEnv);
                 $this->destroySockApplication($appEnv);
-                $this->destroySockAccount($appEnv);
 
+                if (is_null($parentApplication)) {
+                    $this->destroySockAccount($appEnv);
+                }
 
                 $this->entityManager->persist($appEnv);
                 $this->entityManager->flush();

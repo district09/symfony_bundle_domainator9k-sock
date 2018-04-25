@@ -65,7 +65,7 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $dataValueServiceFunctions = [
             [
                 'method' => 'getValue',
-                'willReturn' => false
+                'willReturn' => null
             ],
             [
                 'method' => 'getValue',
