@@ -110,12 +110,12 @@ class BuildEventListener
             $environment = $applicationEnvironment->getEnvironment();
             $parentApplicationEnvironment = $this->entityManager
                 ->getRepository(ApplicationEnvironment::class)
-                ->findOneBy(['application' => $parentApplication,'environment' => $environment]);
+                ->findOneBy(['application' => $parentApplication, 'environment' => $environment]);
 
-            $sockAccountId = $this->dataValueService->getValue($parentApplicationEnvironment,'sock_account_id');
-            $username = $this->dataValueService->getValue($parentApplicationEnvironment,'sock_ssh_user');
+            $sockAccountId = $this->dataValueService->getValue($parentApplicationEnvironment, 'sock_account_id');
+            $username = $this->dataValueService->getValue($parentApplicationEnvironment, 'sock_ssh_user');
 
-            if(!$sockAccountId || !$username){
+            if (!$sockAccountId || !$username) {
                 $this->taskLoggerService->addLine(sprintf(
                     'The parent application was never build, the sock account is not available yet.'));
                 throw new \Exception('The parent application was never build, the sock account is not available yet.');
@@ -170,13 +170,7 @@ class BuildEventListener
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $sockAccountId);
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
 
-        $this->taskLoggerService->addLine('Polling');
-        // Implemented polling
-        $events = $this->apiService->getEvents('accounts', $sockAccountId);
-        while (count($events)) {
-            $events = $this->apiService->getEvents('accounts', $sockAccountId);
-            sleep(5);
-        }
+        $this->doPolling('accounts', $sockAccountId);
     }
 
     /**
@@ -235,13 +229,7 @@ class BuildEventListener
 
         $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $applicationId);
 
-        $this->taskLoggerService->addLine('Polling');
-        // Implemented polling
-        $events = $this->apiService->getEvents('applications', $applicationId);
-        while (count($events)) {
-            $events = $this->apiService->getEvents('applications', $applicationId);
-            sleep(5);
-        }
+        $this->doPolling('applications', $applicationId);
     }
 
     /**
@@ -328,12 +316,29 @@ class BuildEventListener
         $this->entityManager->persist($applicationEnvironment);
         $this->entityManager->flush();
 
+        $this->doPolling('databases', $databaseId);
+    }
+
+    private function doPolling($type, $id)
+    {
         $this->taskLoggerService->addLine('Polling');
-        // Implemented polling
-        $events = $this->apiService->getEvents('databases', $databaseId);
+
+        $iteration = 0;
+
+        $events = $this->apiService->getEvents($type, $id);
         while (count($events)) {
-            $events = $this->apiService->getEvents('databases', $databaseId);
+            $events = $this->apiService->getEvents($type, $id);
             sleep(5);
+
+            $iteration++;
+
+            if ($iteration == 100) {
+                $message = 'The polling took more then 2 minutes';
+
+                $this->taskLoggerService->addLine($message);
+                $this->taskLoggerService->endTask();
+                throw new \Exception($message);
+            }
         }
     }
 }
