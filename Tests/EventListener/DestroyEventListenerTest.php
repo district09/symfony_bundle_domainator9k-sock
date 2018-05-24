@@ -91,18 +91,6 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
                 'method' => 'getValue',
                 'willReturn' => null
             ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 8
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null
-            ],
         ];
 
         $apiServiceFunctions = [
@@ -113,15 +101,11 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
             [
                 'method' => 'removeApplication',
                 'willReturn' => null
-            ],
-            [
-                'method' => 'removeDatabase',
-                'willReturn' => null
             ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $taskService = $this->getTaskServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -134,7 +118,7 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
 
         $eventListener = new DestroyEventListener(
             $dataValueService,
-            $taskLoggerService,
+            $taskService,
             $apiService,
             $entityManager
         );
@@ -197,7 +181,7 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $apiServiceFunctions = [];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $taskService = $this->getTaskServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -217,7 +201,7 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
 
         $eventListener = new DestroyEventListener(
             $dataValueService,
-            $taskLoggerService,
+            $taskService,
             $apiService,
             $entityManager
         );
