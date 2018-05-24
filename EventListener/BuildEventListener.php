@@ -51,7 +51,7 @@ class BuildEventListener
     {
         $this->task = $event->getTask();
 
-        $applicationEnvironment = $task->getApplicationEnvironment();
+        $applicationEnvironment = $this->task->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
         /** @var VirtualServer[] $servers */
@@ -161,7 +161,7 @@ class BuildEventListener
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $account['id']);
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
 
-            $this->doPolling($event, 'accounts', $account['id']);
+            $this->doPolling('accounts', $account['id']);
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -224,7 +224,7 @@ class BuildEventListener
 
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $application['id']);
 
-            $this->doPolling($event, 'applications', $application['id']);
+            $this->doPolling('applications', $application['id']);
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -264,8 +264,7 @@ class BuildEventListener
             if (!$databaseUser = $applicationEnvironment->getDatabaseUser()) {
                 $databaseUser = $databaseName;
                 $saveDatabase = true;
-            }
-            elseif (strlen($databaseUser) > 16) {
+            } elseif (strlen($databaseUser) > 16) {
                 $databaseUser = substr($databaseUser, 0, 16);
                 $saveDatabase = true;
             }
@@ -332,7 +331,7 @@ class BuildEventListener
                 $this->entityManager->flush();
             }
 
-            $this->doPolling($event, 'databases', $databaseId);
+            $this->doPolling('databases', $database['id']);
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -346,7 +345,7 @@ class BuildEventListener
     {
         $this->taskService->addInfoLogMessage($this->task, 'Waiting for changes to be applied.');
 
-        $timestamp = time();
+        $start = time();
         $events = $this->apiService->getEvents($type, $id);
 
         while (count($events)) {

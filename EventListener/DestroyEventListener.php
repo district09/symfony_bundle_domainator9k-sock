@@ -49,8 +49,7 @@ class DestroyEventListener
     {
         $this->task = $event->getTask();
 
-        $applicationEnvironment = $task->getApplicationEnvironment();
-        $application = $applicationEnvironment->getApplication();
+        $applicationEnvironment = $this->task->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
         /** @var VirtualServer[] $servers */
