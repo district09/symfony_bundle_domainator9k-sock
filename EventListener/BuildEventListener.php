@@ -130,7 +130,8 @@ class BuildEventListener
 
             $this->taskService->addInfoLogMessage(
                 $this->task,
-                sprintf('Check if account "%s" exists', $username)
+                sprintf('Check if account "%s" exists', $username),
+                2
             );
 
             $account = $this->apiService->findAccountByName($username, $sockServerId);
@@ -189,7 +190,8 @@ class BuildEventListener
 
             $this->taskService->addInfoLogMessage(
                 $this->task,
-                sprintf('Check if application "%s" exists.', $applicationName)
+                sprintf('Check if application "%s" exists.', $applicationName),
+                2
             );
 
             $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
@@ -277,7 +279,8 @@ class BuildEventListener
 
             $this->taskService->addInfoLogMessage(
                 $this->task,
-                sprintf('Check if database "%s" exists', $databaseName)
+                sprintf('Check if database "%s" exists', $databaseName),
+                2
             );
 
             $database = $this->apiService->findDatabaseByName($databaseName, $sockAccountId);
@@ -343,7 +346,11 @@ class BuildEventListener
 
     private function doPolling($type, $id)
     {
-        $this->taskService->addInfoLogMessage($this->task, 'Waiting for changes to be applied.');
+        $this->taskService->addInfoLogMessage(
+            $this->task,
+            'Waiting for changes to be applied.',
+            2
+        );
 
         $start = time();
         $events = $this->apiService->getEvents($type, $id);
