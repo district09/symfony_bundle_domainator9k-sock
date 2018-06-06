@@ -9,6 +9,7 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
 use DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener;
+use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
@@ -65,9 +66,27 @@ class BuildEventListenerTest extends AbstractEventListenerTest
             ]
         ];
 
+        $apiServiceFunctions = [
+            [
+                'method' => 'getEvents',
+                'with' => ['accounts', 1],
+                'willReturn' => []
+            ],
+            [
+                'method' => 'getEvents',
+                'with' => ['applications', 2],
+                'willReturn' => []
+            ],
+            [
+                'method' => 'getEvents',
+                'with' => ['databases', 3],
+                'willReturn' => []
+            ]
+        ];
+
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskService = $this->getTaskServiceMock();
-        $apiService = $this->getApiServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $task = new Task();
@@ -80,13 +99,13 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
-                return null;
+                return 1;
             },
             'createSockApplication' => function () {
-                return null;
+                return 2;
             },
             'createSockDatabase' => function () {
-                return null;
+                return 3;
             }
         ];
 
@@ -208,10 +227,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'createAccount',
                 'willReturn' => null,
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -281,10 +296,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'findAccountByName',
                 'willReturn' => $account,
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -334,10 +345,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                     'id' => 10
                 ],
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -382,10 +389,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'findApplicationByName',
                 'willReturn' => $application,
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -463,10 +466,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -541,10 +540,6 @@ class BuildEventListenerTest extends AbstractEventListenerTest
                 'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
-            [
-                'method' => 'getEvents',
-                'willReturn' => [],
-            ]
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
@@ -614,7 +609,15 @@ class BuildEventListenerTest extends AbstractEventListenerTest
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskService = $this->getTaskServiceMock();
-        $apiService = $this->getApiServiceMock();
+        $apiService = $this
+            ->getMockBuilder(ApiService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $apiService->expects($this->exactly(2))
+            ->method('getEvents')
+            ->withConsecutive(['accounts', 1], ['applications', 2])
+            ->willReturn([]);
+
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $task = new Task();
@@ -627,9 +630,12 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
-                return null;
+                return 1;
             },
             'createSockApplication' => function () {
+                return 2;
+            },
+            'createSockDatabase' => function () {
                 return null;
             }
         ];
