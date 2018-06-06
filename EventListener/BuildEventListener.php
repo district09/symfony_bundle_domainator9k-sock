@@ -72,22 +72,37 @@ class BuildEventListener
             );
 
             try {
-                $this->createSockAccount($applicationEnvironment, $server);
-                $this->createSockApplication($applicationEnvironment);
-                $this->createSockDatabase($applicationEnvironment, $server);
-
-                $this->taskService->addSuccessLogMessage($this->task, 'Provisioning succeeded.');
+                $polling = [];
+                $polling['accounts'] = $this->createSockAccount($applicationEnvironment, $server);
+                $polling['applications'] = $this->createSockApplication($applicationEnvironment);
+                $polling['databases'] = $this->createSockDatabase($applicationEnvironment, $server);
             } catch (\Exception $ex) {
                 $this->taskService->addFailedLogMessage($this->task, 'Provisioning failed.');
                 $event->stopPropagation();
                 return;
             }
+            try {
+                foreach (array_filter($polling) as $type => $sockId) {
+                    $this->doPolling($type, $sockId);
+                }
+            } catch (\Exception $ex) {
+                $this->taskService
+                    ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
+                    ->addFailedLogMessage($this->task, 'Provisioning failed.');
+                $event->stopPropagation();
+                return;
+            }
+
+            $this->taskService->addSuccessLogMessage($this->task, 'Provisioning succeeded.');
         }
     }
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
      * @param Server $server
+     *
+     * @return int
+     *   The sock account id.
      */
     protected function createSockAccount(ApplicationEnvironment $applicationEnvironment, VirtualServer $server)
     {
@@ -162,7 +177,7 @@ class BuildEventListener
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $account['id']);
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
 
-            $this->doPolling('accounts', $account['id']);
+            return $account['id'];
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -174,6 +189,9 @@ class BuildEventListener
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
+     *
+     * @return int
+     *   The sock application id.
      */
     protected function createSockApplication(ApplicationEnvironment $applicationEnvironment)
     {
@@ -226,7 +244,7 @@ class BuildEventListener
 
             $this->dataValueService->storeValue($applicationEnvironment, 'sock_application_id', $application['id']);
 
-            $this->doPolling('applications', $application['id']);
+            return $application['id'];
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -238,6 +256,9 @@ class BuildEventListener
 
     /**
      * @param ApplicationEnvironment $applicationEnvironment
+     *
+     * @return int|null
+     *   The sock database id, null if no database is required.
      */
     protected function createSockDatabase(ApplicationEnvironment $applicationEnvironment)
     {
@@ -333,8 +354,7 @@ class BuildEventListener
                 $this->entityManager->persist($applicationEnvironment);
                 $this->entityManager->flush();
             }
-
-            $this->doPolling('databases', $database['id']);
+            return $database['id'];
         } catch (\Exception $ex) {
             $this->taskService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -360,7 +380,7 @@ class BuildEventListener
             sleep(5);
 
             if ((time() - $start) >= 600) {
-                throw new \Exception('Timeout, waited more then 10 minutes.');
+                throw new \Exception(sprintf('Timeout, waited more then 10 minutes while polling for %s #%s.', $type, $id));
             }
         }
     }
