@@ -380,7 +380,13 @@ class BuildEventListener
             sleep(5);
 
             if ((time() - $start) >= 600) {
-                throw new \Exception(sprintf('Timeout, waited more then 10 minutes while polling for %s #%s.', $type, $id));
+                throw new \Exception(
+                    sprintf(
+                        'Timeout, waited more then 10 minutes while polling for %s #%s.',
+                        $type,
+                        $id
+                    )
+                );
             }
         }
     }
