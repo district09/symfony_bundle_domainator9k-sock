@@ -79,10 +79,13 @@ abstract class AbstractEventListenerTest extends TestCase
             $method = $functionArr['method'];
             $willReturn = $functionArr['willReturn'];
 
-            $mock
+            $method = $mock
                 ->expects($this->at($index))
-                ->method($method)
-                ->willReturn($willReturn);
+                ->method($method);
+            if (isset($functionArr['with'])) {
+                call_user_func_array([$method, 'with'], $functionArr['with']);
+            }
+            $method->willReturn($willReturn);
 
             $index++;
         }
