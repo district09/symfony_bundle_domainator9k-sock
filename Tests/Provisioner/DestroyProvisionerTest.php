@@ -1,19 +1,19 @@
 <?php
 
 
-namespace DigipolisGent\Domainator9k\SockBundle\Tests\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
-use DigipolisGent\Domainator9k\SockBundle\EventListener\DestroyEventListener;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroyProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
 
-class DestroyEventListenerTest extends AbstractEventListenerTest
+class DestroyProvisionerTest extends AbstractProvisionerTest
 {
 
     public function testOnDestroy()
@@ -114,15 +114,13 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new DestroyEvent($task);
-
-        $eventListener = new DestroyEventListener(
+        $provisioner = new DestroyProvisioner(
             $dataValueService,
             $taskService,
             $apiService,
             $entityManager
         );
-        $eventListener->onDestroy($event);
+        $provisioner->run($task);
     }
 
     public function testOnDestroyWithException()
@@ -197,15 +195,13 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new DestroyEvent($task);
-
-        $eventListener = new DestroyEventListener(
+        $provisioner = new DestroyProvisioner(
             $dataValueService,
             $taskService,
             $apiService,
             $entityManager
         );
-        $eventListener->onDestroy($event);
+        $provisioner->run($task);
     }
 
 }

@@ -1,25 +1,22 @@
 <?php
 
-namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\CoreBundle\Event\AbstractEvent;
-use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
+use DigipolisGent\Domainator9k\CoreBundle\Provisioner\ProvisionerInterface;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Exception\ClientException;
 
 /**
- * Class BuildEventListener
+ * Class BuildProvisioner
  *
- * @package DigipolisGent\Domainator9k\SockBundle\EventListener
+ * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
-class BuildEventListener
+class BuildProvisioner implements ProvisionerInterface
 {
 
     private $dataValueService;
@@ -29,7 +26,7 @@ class BuildEventListener
     private $task;
 
     /**
-     * BuildEventListener constructor.
+     * BuildProvisioner constructor.
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
@@ -45,11 +42,11 @@ class BuildEventListener
     }
 
     /**
-     * @param BuildEvent $event
+     * @param Task $task
      */
-    public function onBuild(BuildEvent $event)
+    public function run(Task $task)
     {
-        $this->task = $event->getTask();
+        $this->task = $task;
 
         $applicationEnvironment = $this->task->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
@@ -78,7 +75,7 @@ class BuildEventListener
                 $polling['databases'] = $this->createSockDatabase($applicationEnvironment, $server);
             } catch (\Exception $ex) {
                 $this->taskService->addFailedLogMessage($this->task, 'Provisioning failed.');
-                $event->stopPropagation();
+                $this->task->setFailed();
                 return;
             }
             try {
@@ -89,7 +86,7 @@ class BuildEventListener
                 $this->taskService
                     ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
                     ->addFailedLogMessage($this->task, 'Provisioning failed.');
-                $event->stopPropagation();
+                $this->task->setFailed();
                 return;
             }
 

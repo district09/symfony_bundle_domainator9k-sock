@@ -1,11 +1,11 @@
 <?php
 
-namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
-use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
+use DigipolisGent\Domainator9k\CoreBundle\Provisioner\ProvisionerInterface;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\Service\DataValueService;
@@ -13,11 +13,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
 
 /**
- * Class BuildEventListener
+ * Class BuildProvisioner
  *
- * @package DigipolisGent\Domainator9k\SockBundle\EventListener
+ * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
-class DestroyEventListener
+class DestroyProvisioner implements ProvisionerInterface
 {
 
     private $dataValueService;
@@ -27,7 +27,7 @@ class DestroyEventListener
     private $task;
 
     /**
-     * BuildEventListener constructor.
+     * DestroyProvisioner constructor.
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
@@ -43,11 +43,11 @@ class DestroyEventListener
     }
 
     /**
-     * @param BuildEvent $event
+     * @param Task $task
      */
-    public function onDestroy(DestroyEvent $event)
+    public function run(Task $task)
     {
-        $this->task = $event->getTask();
+        $this->task = $task;
 
         $applicationEnvironment = $this->task->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
@@ -84,7 +84,7 @@ class DestroyEventListener
                 $this->taskService->addSuccessLogMessage($this->task, 'Cleanup succeeded.');
             } catch (\Exception $ex) {
                 $this->taskService->addFailedLogMessage($this->task, 'Cleanup failed.');
-                $event->stopPropagation();
+                $this->task->setFailed();
                 return;
             }
         }
