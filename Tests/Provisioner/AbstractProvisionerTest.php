@@ -6,7 +6,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
-use DigipolisGent\Domainator9k\CoreBundle\Service\TaskService;
+use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
@@ -57,10 +57,10 @@ abstract class AbstractProvisionerTest extends TestCase
         return $mock;
     }
 
-    protected function getTaskServiceMock()
+    protected function getTaskLoggerServiceMock()
     {
         $mock = $this
-            ->getMockBuilder(TaskService::class)
+            ->getMockBuilder(TaskLoggerService::class)
             ->disableOriginalConstructor()
             ->getMock();
 

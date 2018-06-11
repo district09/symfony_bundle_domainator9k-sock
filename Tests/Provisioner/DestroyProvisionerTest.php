@@ -105,7 +105,7 @@ class DestroyProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -116,11 +116,12 @@ class DestroyProvisionerTest extends AbstractProvisionerTest
 
         $provisioner = new DestroyProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
-        $provisioner->run($task);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
     public function testOnDestroyWithException()
@@ -179,7 +180,7 @@ class DestroyProvisionerTest extends AbstractProvisionerTest
         $apiServiceFunctions = [];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -197,11 +198,12 @@ class DestroyProvisionerTest extends AbstractProvisionerTest
 
         $provisioner = new DestroyProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
-        $provisioner->run($task);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
 }

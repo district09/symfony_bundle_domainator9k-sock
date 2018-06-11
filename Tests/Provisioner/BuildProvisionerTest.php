@@ -84,7 +84,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -93,7 +93,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 return 1;
@@ -107,7 +107,8 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $provisioner = $this->getProvisionerMock($arguments, $methods);
-        $provisioner->run($task);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
 
@@ -156,18 +157,18 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateSockAccountWithoutParentApplication()
@@ -227,18 +228,18 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateExistingSockAccount()
@@ -296,19 +297,19 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createAccount');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateSockApplication()
@@ -345,18 +346,18 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockApplication', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockApplication', $applicationEnvironment);
     }
 
     public function testCreateExistingSockApplication()
@@ -389,19 +390,19 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createApplication');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockApplication', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockApplication', $applicationEnvironment);
     }
 
     public function testCreateSockDatabase()
@@ -466,18 +467,18 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockDatabase', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
     public function testCreateExistingSockDatabase()
@@ -540,19 +541,19 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createDatabase');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildProvisioner(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeProvisionerMethod($listener, 'createSockDatabase', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
     public function testOnBuildWithoutDatabase()
@@ -605,7 +606,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this
             ->getMockBuilder(ApiService::class)
             ->disableOriginalConstructor()
@@ -622,7 +623,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 return 1;
@@ -636,9 +637,13 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $provisioner = $this->getProvisionerMock($arguments, $methods);
-        $provisioner->run($task);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
+    /**
+     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
+     */
     public function testOnBuildWithException()
     {
         $prodEnvironment = new Environment();
@@ -689,7 +694,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock();
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -698,7 +703,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 throw new ClientException('This is an exception.', $this->getRequestMock());
@@ -706,6 +711,7 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         ];
 
         $provisioner = $this->getProvisionerMock($arguments, $methods);
-        $provisioner->run($task);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 }
