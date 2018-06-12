@@ -206,4 +206,13 @@ class DestroyProvisionerTest extends AbstractProvisionerTest
         $provisioner->run();
     }
 
+    public function testGetName()
+    {
+        $dataValueService = $this->getDataValueServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock();
+        $entityManager = $this->getEntityManagerMock();
+        $provisioner = new DestroyProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock accounts, applications and databases');
+    }
 }

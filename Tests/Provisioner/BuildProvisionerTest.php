@@ -714,4 +714,14 @@ class BuildProvisionerTest extends AbstractProvisionerTest
         $provisioner->setTask($task);
         $provisioner->run();
     }
+
+    public function testGetName()
+    {
+        $dataValueService = $this->getDataValueServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock();
+        $entityManager = $this->getEntityManagerMock();
+        $provisioner = new BuildProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock accounts, applications and databases');
+    }
 }
