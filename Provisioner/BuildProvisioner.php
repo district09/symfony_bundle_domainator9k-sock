@@ -1,56 +1,47 @@
 <?php
 
-namespace DigipolisGent\Domainator9k\SockBundle\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationServer;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\CoreBundle\Event\AbstractEvent;
-use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
-use DigipolisGent\Domainator9k\CoreBundle\Service\TaskService;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
+use DigipolisGent\Domainator9k\CoreBundle\Provisioner\AbstractProvisioner;
+use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Exception\ClientException;
 
 /**
- * Class BuildEventListener
+ * Class BuildProvisioner
  *
- * @package DigipolisGent\Domainator9k\SockBundle\EventListener
+ * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
-class BuildEventListener
+class BuildProvisioner extends AbstractProvisioner
 {
 
     private $dataValueService;
-    private $taskService;
+    private $taskLoggerService;
     private $apiService;
     private $entityManager;
-    private $task;
 
     /**
-     * BuildEventListener constructor.
+     * BuildProvisioner constructor.
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
         DataValueService $dataValueService,
-        TaskService $taskService,
+        TaskLoggerService $taskLoggerService,
         ApiService $apiService,
         EntityManagerInterface $entityManager
     ) {
         $this->dataValueService = $dataValueService;
-        $this->taskService = $taskService;
+        $this->taskLoggerService = $taskLoggerService;
         $this->apiService = $apiService;
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @param BuildEvent $event
-     */
-    public function onBuild(BuildEvent $event)
+    public function doRun()
     {
-        $this->task = $event->getTask();
-
         $applicationEnvironment = $this->task->getApplicationEnvironment();
         $environment = $applicationEnvironment->getEnvironment();
 
@@ -66,7 +57,7 @@ class BuildEventListener
                 continue;
             }
 
-            $this->taskService->addLogHeader(
+            $this->taskLoggerService->addLogHeader(
                 $this->task,
                 sprintf('Sock server "%s"', $server->getName())
             );
@@ -77,23 +68,21 @@ class BuildEventListener
                 $polling['applications'] = $this->createSockApplication($applicationEnvironment);
                 $polling['databases'] = $this->createSockDatabase($applicationEnvironment, $server);
             } catch (\Exception $ex) {
-                $this->taskService->addFailedLogMessage($this->task, 'Provisioning failed.');
-                $event->stopPropagation();
-                return;
+                $this->taskLoggerService->addFailedLogMessage($this->task, 'Provisioning failed.');
+                throw new LoggedException('', 0, $ex);
             }
             try {
                 foreach (array_filter($polling) as $type => $sockId) {
                     $this->doPolling($type, $sockId);
                 }
             } catch (\Exception $ex) {
-                $this->taskService
+                $this->taskLoggerService
                     ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
                     ->addFailedLogMessage($this->task, 'Provisioning failed.');
-                $event->stopPropagation();
-                return;
+                throw new LoggedException('', 0, $ex);
             }
 
-            $this->taskService->addSuccessLogMessage($this->task, 'Provisioning succeeded.');
+            $this->taskLoggerService->addSuccessLogMessage($this->task, 'Provisioning succeeded.');
         }
     }
 
@@ -106,7 +95,7 @@ class BuildEventListener
      */
     protected function createSockAccount(ApplicationEnvironment $applicationEnvironment, VirtualServer $server)
     {
-        $this->taskService->addLogHeader($this->task, 'Provisioning account', 1);
+        $this->taskLoggerService->addLogHeader($this->task, 'Provisioning account', 1);
 
         try {
             $application = $applicationEnvironment->getApplication();
@@ -132,7 +121,7 @@ class BuildEventListener
                 $this->dataValueService->storeValue($applicationEnvironment, 'sock_account_id', $sockAccountId);
                 $this->dataValueService->storeValue($applicationEnvironment, 'sock_ssh_user', $username);
 
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Use parent account "%s".', $parentApplication->getName()),
                     2
@@ -143,7 +132,7 @@ class BuildEventListener
 
             $username = $application->getNameCanonical();
 
-            $this->taskService->addInfoLogMessage(
+            $this->taskLoggerService->addInfoLogMessage(
                 $this->task,
                 sprintf('Check if account "%s" exists', $username),
                 2
@@ -153,13 +142,13 @@ class BuildEventListener
             $sshKeyIds = $this->dataValueService->getValue($applicationEnvironment, 'sock_ssh_key');
 
             if ($account) {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Found account %s.', $account['id']),
                     2
                 );
             } else {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     'No account found.',
                     2
@@ -167,7 +156,7 @@ class BuildEventListener
 
                 $account = $this->apiService->createAccount($username, $sockServerId, $sshKeyIds);
 
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Account %s created.', $account['id']),
                     2
@@ -179,7 +168,7 @@ class BuildEventListener
 
             return $account['id'];
         } catch (\Exception $ex) {
-            $this->taskService
+            $this->taskLoggerService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
                 ->addFailedLogMessage($this->task, 'Provisioning account failed.', 2);
 
@@ -195,7 +184,7 @@ class BuildEventListener
      */
     protected function createSockApplication(ApplicationEnvironment $applicationEnvironment)
     {
-        $this->taskService->addLogHeader($this->task, 'Provisioning application', 1);
+        $this->taskLoggerService->addLogHeader($this->task, 'Provisioning application', 1);
 
         try {
             $application = $applicationEnvironment->getApplication();
@@ -206,7 +195,7 @@ class BuildEventListener
             // Check if the account exists.
             $this->apiService->getAccount($sockAccountId);
 
-            $this->taskService->addInfoLogMessage(
+            $this->taskLoggerService->addInfoLogMessage(
                 $this->task,
                 sprintf('Check if application "%s" exists.', $applicationName),
                 2
@@ -215,13 +204,13 @@ class BuildEventListener
             $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
 
             if ($application) {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Found application %s.', $application['id']),
                     2
                 );
             } else {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     'No application found.',
                     2
@@ -235,7 +224,7 @@ class BuildEventListener
                     $technology ? $technology : 'php-fpm'
                 );
 
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Application %s created.', $application['id']),
                     2
@@ -246,7 +235,7 @@ class BuildEventListener
 
             return $application['id'];
         } catch (\Exception $ex) {
-            $this->taskService
+            $this->taskLoggerService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
                 ->addFailedLogMessage($this->task, 'Provisioning application failed.', 2);
 
@@ -262,10 +251,10 @@ class BuildEventListener
      */
     protected function createSockDatabase(ApplicationEnvironment $applicationEnvironment)
     {
-        $this->taskService->addLogHeader($this->task, 'Provisioning database', 1);
+        $this->taskLoggerService->addLogHeader($this->task, 'Provisioning database', 1);
 
         if (!$applicationEnvironment->getApplication()->isHasDatabase()) {
-            $this->taskService->addInfoLogMessage($this->task, 'No database required.', 2);
+            $this->taskLoggerService->addInfoLogMessage($this->task, 'No database required.', 2);
             return;
         }
 
@@ -298,7 +287,7 @@ class BuildEventListener
                 $saveDatabase = true;
             }
 
-            $this->taskService->addInfoLogMessage(
+            $this->taskLoggerService->addInfoLogMessage(
                 $this->task,
                 sprintf('Check if database "%s" exists', $databaseName),
                 2
@@ -307,13 +296,13 @@ class BuildEventListener
             $database = $this->apiService->findDatabaseByName($databaseName, $sockAccountId);
 
             if ($database) {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Found database %s.', $database['id']),
                     2
                 );
             } else {
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     'No database found.',
                     2
@@ -326,7 +315,7 @@ class BuildEventListener
                     $databasePassword
                 );
 
-                $this->taskService->addInfoLogMessage(
+                $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Database %s created.', $database['id']),
                     2
@@ -335,7 +324,7 @@ class BuildEventListener
 
             $login = $database['database_grants'][0]['login'];
 
-            $this->taskService->addInfoLogMessage(
+            $this->taskLoggerService->addInfoLogMessage(
                 $this->task,
                 'Update access grants.',
                 2
@@ -356,7 +345,7 @@ class BuildEventListener
             }
             return $database['id'];
         } catch (\Exception $ex) {
-            $this->taskService
+            $this->taskLoggerService
                 ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
                 ->addFailedLogMessage($this->task, 'Provisioning database failed.', 2);
 
@@ -366,7 +355,7 @@ class BuildEventListener
 
     private function doPolling($type, $id)
     {
-        $this->taskService->addInfoLogMessage(
+        $this->taskLoggerService->addInfoLogMessage(
             $this->task,
             'Waiting for changes to be applied.',
             2
@@ -389,5 +378,10 @@ class BuildEventListener
                 );
             }
         }
+    }
+
+    public function getName()
+    {
+        return 'Sock accounts, applications and databases';
     }
 }

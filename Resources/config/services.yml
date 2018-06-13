@@ -5,12 +5,12 @@ services:
         public: true
         tags:
             - { name: data_type_provider }
-    DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener:
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner:
         tags:
-            - { name: kernel.event_listener, event: domainator.build, method: onBuild, priority: 50 }
-    DigipolisGent\Domainator9k\SockBundle\EventListener\DestroyEventListener:
+            - { name: domainator.provisioner.build, priority: 50 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroyProvisioner:
         tags:
-            - { name: kernel.event_listener, event: domainator.destroy, method: onDestroy, priority: 50 }
+            - { name: domainator.provisioner.destroy, priority: 50 }
     DigipolisGent\Domainator9k\SockBundle\FieldType\ParentApplicationFieldType:
         public: true
         tags:

@@ -1,20 +1,19 @@
 <?php
 
 
-namespace DigipolisGent\Domainator9k\SockBundle\Tests\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\CoreBundle\Event\BuildEvent;
-use DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
 
-class BuildEventListenerTest extends AbstractEventListenerTest
+class BuildProvisionerTest extends AbstractProvisionerTest
 {
 
     public function testOnBuildWithDatabase()
@@ -85,7 +84,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -94,9 +93,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new BuildEvent($task);
-
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 return 1;
@@ -109,8 +106,9 @@ class BuildEventListenerTest extends AbstractEventListenerTest
             }
         ];
 
-        $eventListener = $this->getEventListenerMock($arguments, $methods);
-        $eventListener->onBuild($event);
+        $provisioner = $this->getProvisionerMock($arguments, $methods);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
 
@@ -159,18 +157,18 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateSockAccountWithoutParentApplication()
@@ -230,18 +228,18 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateExistingSockAccount()
@@ -299,19 +297,19 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createAccount');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
     public function testCreateSockApplication()
@@ -348,18 +346,18 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockApplication', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockApplication', $applicationEnvironment);
     }
 
     public function testCreateExistingSockApplication()
@@ -392,19 +390,19 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createApplication');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockApplication', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockApplication', $applicationEnvironment);
     }
 
     public function testCreateSockDatabase()
@@ -469,18 +467,18 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockDatabase', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
     public function testCreateExistingSockDatabase()
@@ -543,19 +541,19 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $apiService->expects($this->never())->method('createDatabase');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
-        $listener = new BuildEventListener(
+        $provisioner = new BuildProvisioner(
             $dataValueService,
-            $taskService,
+            $taskLoggerService,
             $apiService,
             $entityManager
         );
 
-        $this->invokeEventListenerMethod($listener, 'createSockDatabase', $applicationEnvironment);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
     public function testOnBuildWithoutDatabase()
@@ -608,7 +606,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this
             ->getMockBuilder(ApiService::class)
             ->disableOriginalConstructor()
@@ -625,9 +623,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new BuildEvent($task);
-
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 return 1;
@@ -640,10 +636,14 @@ class BuildEventListenerTest extends AbstractEventListenerTest
             }
         ];
 
-        $eventListener = $this->getEventListenerMock($arguments, $methods);
-        $eventListener->onBuild($event);
+        $provisioner = $this->getProvisionerMock($arguments, $methods);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
+    /**
+     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
+     */
     public function testOnBuildWithException()
     {
         $prodEnvironment = new Environment();
@@ -694,7 +694,7 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskService = $this->getTaskServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock();
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
@@ -703,16 +703,25 @@ class BuildEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new BuildEvent($task);
-
-        $arguments = [$dataValueService, $taskService, $apiService, $entityManager];
+        $arguments = [$dataValueService, $taskLoggerService, $apiService, $entityManager];
         $methods = [
             'createSockAccount' => function () {
                 throw new ClientException('This is an exception.', $this->getRequestMock());
             },
         ];
 
-        $eventListener = $this->getEventListenerMock($arguments, $methods);
-        $eventListener->onBuild($event);
+        $provisioner = $this->getProvisionerMock($arguments, $methods);
+        $provisioner->setTask($task);
+        $provisioner->run();
+    }
+
+    public function testGetName()
+    {
+        $dataValueService = $this->getDataValueServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock();
+        $entityManager = $this->getEntityManagerMock();
+        $provisioner = new BuildProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock accounts, applications and databases');
     }
 }
