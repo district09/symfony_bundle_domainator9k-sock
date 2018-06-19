@@ -362,6 +362,7 @@ class BuildProvisioner extends AbstractProvisioner
         $start = time();
 
         do {
+            $count = 0;
             foreach ($polling as $type => $sockId) {
                 $events = $this->apiService->getEvents($type, $sockId);
                 $count += count($events);
