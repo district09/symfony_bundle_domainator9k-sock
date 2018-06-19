@@ -375,18 +375,18 @@ class BuildProvisioner extends AbstractProvisioner
                 break;
             }
 
-           if ((time() - $start) >= 600) {
-               throw new \Exception(
-                   sprintf(
-                       'Timeout, waited more then 10 minutes while polling for %s #%s.',
-                       $type,
-                       $id
-                   )
-               );
-           }
+            if ((time() - $start) >= 600) {
+                throw new \Exception(
+                    sprintf(
+                        'Timeout, waited more then 10 minutes while polling for %s #%s.',
+                        $type,
+                        $sockId
+                    )
+                );
+            }
 
             sleep(5);
-        } while (TRUE);
+        } while (true);
     }
 
     public function getName()
