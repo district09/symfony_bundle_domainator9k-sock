@@ -81,7 +81,7 @@ class SshKeyChoiceFieldType extends AbstractFieldType
      */
     public function encodeValue($value): ?string
     {
-        return json_encode($value);
+        return json_encode(array_values($value));
     }
 
     /**
