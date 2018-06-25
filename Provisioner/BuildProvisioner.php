@@ -72,9 +72,7 @@ class BuildProvisioner extends AbstractProvisioner
                 throw new LoggedException('', 0, $ex);
             }
             try {
-                foreach (array_filter($polling) as $type => $sockId) {
-                    $this->doPolling($type, $sockId);
-                }
+                $this->doPolling(array_filter($polling));
             } catch (\Exception $ex) {
                 $this->taskLoggerService
                     ->addErrorLogMessage($this->task, $ex->getMessage(), 2)
@@ -353,7 +351,7 @@ class BuildProvisioner extends AbstractProvisioner
         }
     }
 
-    private function doPolling($type, $id)
+    private function doPolling(array $polling)
     {
         $this->taskLoggerService->addInfoLogMessage(
             $this->task,
@@ -362,22 +360,31 @@ class BuildProvisioner extends AbstractProvisioner
         );
 
         $start = time();
-        $events = $this->apiService->getEvents($type, $id);
 
-        while (count($events)) {
-            $events = $this->apiService->getEvents($type, $id);
-            sleep(5);
+        do {
+            $events = false;
+            foreach ($polling as $type => $sockId) {
+                if ($events = $this->apiService->getEvents($type, $sockId)) {
+                    break;
+                }
+            }
+
+            if (!$events) {
+                break;
+            }
 
             if ((time() - $start) >= 600) {
                 throw new \Exception(
                     sprintf(
                         'Timeout, waited more then 10 minutes while polling for %s #%s.',
                         $type,
-                        $id
+                        $sockId
                     )
                 );
             }
-        }
+
+            sleep(5);
+        } while (true);
     }
 
     public function getName()
