@@ -1,19 +1,19 @@
 <?php
 
 
-namespace DigipolisGent\Domainator9k\SockBundle\Tests\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Event\DestroyEvent;
-use DigipolisGent\Domainator9k\SockBundle\EventListener\DestroyEventListener;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroyProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
 
-class DestroyEventListenerTest extends AbstractEventListenerTest
+class DestroyProvisionerTest extends AbstractProvisionerTest
 {
 
     public function testOnDestroy()
@@ -65,7 +65,7 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $dataValueServiceFunctions = [
             [
                 'method' => 'getValue',
-                'willReturn' => false
+                'willReturn' => null
             ],
             [
                 'method' => 'getValue',
@@ -89,14 +89,6 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
             ],
             [
                 'method' => 'getValue',
-                'willReturn' => 8
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null
-            ],
-            [
-                'method' => 'storeValue',
                 'willReturn' => null
             ],
         ];
@@ -108,10 +100,6 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
             ],
             [
                 'method' => 'removeApplication',
-                'willReturn' => null
-            ],
-            [
-                'method' => 'removeDatabase',
                 'willReturn' => null
             ]
         ];
@@ -126,15 +114,14 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new DestroyEvent($task);
-
-        $eventListener = new DestroyEventListener(
+        $provisioner = new DestroyProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
             $entityManager
         );
-        $eventListener->onDestroy($event);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
     public function testOnDestroyWithException()
@@ -209,15 +196,23 @@ class DestroyEventListenerTest extends AbstractEventListenerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $event = new DestroyEvent($task);
-
-        $eventListener = new DestroyEventListener(
+        $provisioner = new DestroyProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
             $entityManager
         );
-        $eventListener->onDestroy($event);
+        $provisioner->setTask($task);
+        $provisioner->run();
     }
 
+    public function testGetName()
+    {
+        $dataValueService = $this->getDataValueServiceMock();
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock();
+        $entityManager = $this->getEntityManagerMock();
+        $provisioner = new DestroyProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock accounts, applications and databases');
+    }
 }

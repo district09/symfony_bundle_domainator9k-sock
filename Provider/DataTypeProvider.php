@@ -80,6 +80,22 @@ class DataTypeProvider implements DataTypeProviderInterface
                 'entity_types' => ['application'],
                 'order' => 5
             ],
+            [
+                'key' => 'sock_application_technology',
+                'label' => 'Sock application technology',
+                'required' => true,
+                'field_type' => 'sock_technology',
+                'entity_types' => ['application'],
+                'order' => 6,
+                'default_value' => 'php-fpm',
+            ],
+            [
+                'key' => 'database_host',
+                'label' => 'Database host',
+                'required' => true,
+                'field_type' => 'database_host',
+                'entity_types' => ['environment','application_environment'],
+            ],
         ];
     }
 }

@@ -1,18 +1,22 @@
 <?php
 
 
-namespace DigipolisGent\Domainator9k\SockBundle\Tests\EventListener;
+namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 
+use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
+use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
-use DigipolisGent\Domainator9k\SockBundle\EventListener\BuildEventListener;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
+use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-abstract class AbstractEventListenerTest extends TestCase
+abstract class AbstractProvisionerTest extends TestCase
 {
 
     protected function getRepositoryMock($method, $returnValue)
@@ -75,10 +79,13 @@ abstract class AbstractEventListenerTest extends TestCase
             $method = $functionArr['method'];
             $willReturn = $functionArr['willReturn'];
 
-            $mock
+            $method = $mock
                 ->expects($this->at($index))
-                ->method($method)
-                ->willReturn($willReturn);
+                ->method($method);
+            if (isset($functionArr['with'])) {
+                call_user_func_array([$method, 'with'], $functionArr['with']);
+            }
+            $method->willReturn($willReturn);
 
             $index++;
         }
@@ -110,10 +117,10 @@ abstract class AbstractEventListenerTest extends TestCase
         return $mock;
     }
 
-    protected function getEventListenerMock(array $arguments, array $methods)
+    protected function getProvisionerMock(array $arguments, array $methods)
     {
         $mock = $this
-            ->getMockBuilder(BuildEventListener::class)
+            ->getMockBuilder(BuildProvisioner::class)
             ->setMethods(array_keys($methods))
             ->setConstructorArgs($arguments)
             ->getMock();
@@ -135,5 +142,49 @@ abstract class AbstractEventListenerTest extends TestCase
             ->getMock();
 
         return $mock;
+    }
+
+    /**
+     * Call a protected/private method of a provisioner.
+     *
+     * @param object &$object
+     *   The provisioner.
+     * @param string $methodName
+     *   Name of the method to call.
+     * @param array $args,..
+     *  Arguments to pass to method.
+     *
+     * @return mixed
+     *   Method return.
+     */
+    protected function invokeProvisionerMethod($provisioner, $methodName)
+    {
+        $environment = new Environment();
+        $environment->setName('test');
+
+        $application = new FooApplication();
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setEnvironment($environment);
+        $applicationEnvironment->setApplication($application);
+
+        $task = new Task();
+        $task->setType($provisioner instanceof BuildProvisioner ? Task::TYPE_BUILD : Task::TYPE_DESTROY);
+        $task->setStatus(Task::STATUS_NEW);
+        $task->setApplicationEnvironment($applicationEnvironment);
+
+        $reflection = new \ReflectionClass(get_class($provisioner));
+
+        $property = $reflection->getProperty('task');
+        $property->setAccessible(true);
+        $property->setValue($provisioner, $task);
+
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        $args = func_get_args();
+        $args = array_splice($args, 2);
+
+        return $method->invokeArgs($provisioner, $args);
     }
 }

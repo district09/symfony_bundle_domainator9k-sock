@@ -112,7 +112,7 @@ class SshKeyChoiceFieldTypeTest extends TestCase
         $apiService = $this->getApiServiceMock();
         $dataValueService = $this->getDataValueServiceMock();
         $fieldType = new SshKeyChoiceFieldType($apiService, $dataValueService);
-        $this->assertEquals('{"one":"two"}', $fieldType->encodeValue(['one' => 'two']));
+        $this->assertEquals('["two"]', $fieldType->encodeValue(['one' => 'two']));
     }
 
     public function testDecodeValue()

@@ -6,6 +6,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\Tests\FieldType;
 use DigipolisGent\Domainator9k\SockBundle\FieldType\SockServerFieldType;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class SockServerFieldTypeTest extends TestCase
@@ -19,13 +20,15 @@ class SockServerFieldTypeTest extends TestCase
     public function testGetFormType()
     {
         $apiService = $this->getApiServiceMock();
-        $fieldType = new SockServerFieldType($apiService);
+        $cache = $this->getCacheMock();
+        $fieldType = new SockServerFieldType($apiService, $cache);
         $this->assertEquals(ChoiceType::class, $fieldType->getFormType());
     }
 
     public function testGetOptions()
     {
         $apiService = $this->getApiServiceMock();
+        $cache = $this->getCacheMock();
 
         $servers = [
             [
@@ -47,7 +50,7 @@ class SockServerFieldTypeTest extends TestCase
             ->method('getVirtualServers')
             ->willReturn($servers);
 
-        $fieldType = new SockServerFieldType($apiService);
+        $fieldType = new SockServerFieldType($apiService, $cache);
         $options = $fieldType->getOptions(1);
 
         $this->assertArrayHasKey('multiple',$options);
@@ -67,5 +70,10 @@ class SockServerFieldTypeTest extends TestCase
             ->getMock();
 
         return $mock;
+    }
+
+    private function getCacheMock()
+    {
+        return new ArrayAdapter();
     }
 }
