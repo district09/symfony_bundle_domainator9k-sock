@@ -50,7 +50,7 @@ class ApiService
      * @param $uri
      * @return mixed
      */
-    private function get($uri, $query = array())
+    private function get($uri, $query = [])
     {
         return $this->request('get', $uri, $query);
     }
@@ -162,7 +162,7 @@ class ApiService
      * @param $serverId
      * @return mixed
      */
-    public function createAccount($name, $serverId, array $sshKeyIds = array())
+    public function createAccount($name, $serverId, array $sshKeyIds = [])
     {
         return $this->post(
             '/accounts',
@@ -234,7 +234,7 @@ class ApiService
     public function createApplication(
         $accountId,
         $name,
-        $aliases = array(),
+        $aliases = [],
         $documentrootSuffix = 'current',
         $technology = 'php-fpm'
     ) {
