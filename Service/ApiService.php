@@ -98,7 +98,8 @@ class ApiService
      * @return array
      *   The response body.
      */
-    private function request(string $method, string $uri, array $data = []) {
+    private function request(string $method, string $uri, array $data = [])
+    {
         $dataKey = 'form_params';
         $query = [];
 
@@ -127,7 +128,7 @@ class ApiService
                     'Accept' => 'application/json',
                 ],
                 'query' => $query,
-                $dataKey => $formParams,
+                $dataKey => $data,
             ]
         );
 
