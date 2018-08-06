@@ -457,10 +457,6 @@ class BuildProvisionerTest extends AbstractProvisionerTest
                 ],
             ],
             [
-                'method' => 'removeDatabaseLogin',
-                'willReturn' => null,
-            ],
-            [
                 'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
@@ -529,10 +525,6 @@ class BuildProvisionerTest extends AbstractProvisionerTest
             [
                 'method' => 'findDatabaseByName',
                 'willReturn' => $database,
-            ],
-            [
-                'method' => 'removeDatabaseLogin',
-                'willReturn' => null,
             ],
             [
                 'method' => 'addDatabaseLogin',
