@@ -22,8 +22,8 @@ abstract class AbstractSockProvisioner extends AbstractProvisioner
     {
         $provisioners = $this->task->getProvisioners();
         if ($provisioners && !in_array(PollingProvisioner::class, $provisioners)) {
-          $provisioners[] = PollingProvisioner::class;
-          $this->task->setProvisioners($provisioners);
+            $provisioners[] = PollingProvisioner::class;
+            $this->task->setProvisioners($provisioners);
         }
     }
 }

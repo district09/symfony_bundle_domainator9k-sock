@@ -121,12 +121,12 @@ class BuildSockAccountProvisioner extends AbstractSockProvisioner
 
             if ($parentApplication) {
                 $environment = $appEnv->getEnvironment();
-                $parentApplicationEnvironment = $this->entityManager
+                $parentAppEnv = $this->entityManager
                     ->getRepository(ApplicationEnvironment::class)
                     ->findOneBy(['application' => $parentApplication, 'environment' => $environment]);
 
-                $sockAccountId = $this->dataValueService->getValue($parentApplicationEnvironment, 'sock_account_id');
-                $username = $this->dataValueService->getValue($parentApplicationEnvironment, 'sock_ssh_user');
+                $sockAccountId = $this->dataValueService->getValue($parentAppEnv, 'sock_account_id');
+                $username = $this->dataValueService->getValue($parentAppEnv, 'sock_ssh_user');
 
                 if (!$sockAccountId || !$username) {
                     throw new \Exception('The parent application must be build first.');

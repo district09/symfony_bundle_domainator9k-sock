@@ -5,7 +5,8 @@ namespace DigipolisGent\Domainator9k\SockBundle\Service;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 
-class SockPollerService {
+class SockPollerService
+{
 
     protected $taskLoggerService;
     protected $apiService;
@@ -22,7 +23,8 @@ class SockPollerService {
         $this->polling = [];
     }
 
-    public function addPolling($type, $id, Task $task) {
+    public function addPolling($type, $id, Task $task)
+    {
         $this->polling[$task->getId()][$type] = $id;
     }
 
