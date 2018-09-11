@@ -2,14 +2,7 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\Provisioner;
 
-use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
 use DigipolisGent\Domainator9k\CoreBundle\Provisioner\AbstractProvisioner;
-use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
-use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
-use DigipolisGent\SettingBundle\Service\DataValueService;
-use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Class AbstractSockProvisioner

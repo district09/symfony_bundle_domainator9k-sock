@@ -7,7 +7,6 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockAccountProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Service\SockPollerService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
