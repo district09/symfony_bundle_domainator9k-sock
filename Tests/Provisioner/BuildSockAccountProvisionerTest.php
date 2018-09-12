@@ -1,6 +1,5 @@
 <?php
 
-
 namespace DigipolisGent\Domainator9k\SockBundle\Tests\Provisioner;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;

@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class BuildSockApplicationProvisioner extends AbstractSockProvisioner
 {
+    const POLLING_TYPE = 'applications';
 
     /**
      * @var ApiService
@@ -88,7 +89,7 @@ class BuildSockApplicationProvisioner extends AbstractSockProvisioner
             try {
                 $appId = $this->createSockApplication($appEnv);
                 if ($appId) {
-                    $this->sockPoller->addPolling(SockPollerService::POLLING_TYPE_APPLICATION, $appId, $this->task);
+                    $this->sockPoller->addPolling(static::POLLING_TYPE, $appId, $this->task);
                     $this->ensurePollingProvisioner();
                 }
             } catch (\Exception $ex) {

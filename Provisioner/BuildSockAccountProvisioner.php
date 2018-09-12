@@ -12,12 +12,13 @@ use DigipolisGent\SettingBundle\Service\DataValueService;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Class BuildProvisioner
+ * Class BuildSockAccountProvisioner
  *
  * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
 class BuildSockAccountProvisioner extends AbstractSockProvisioner
 {
+    const POLLING_TYPE = 'accounts';
 
     /**
      * @var ApiService
@@ -88,7 +89,7 @@ class BuildSockAccountProvisioner extends AbstractSockProvisioner
             try {
                 $accountId = $this->createSockAccount($appEnv, $server);
                 if ($accountId) {
-                    $this->sockPoller->addPolling(SockPollerService::POLLING_TYPE_ACCOUNT, $accountId, $this->task);
+                    $this->sockPoller->addPolling(static::POLLING_TYPE, $accountId, $this->task);
                     $this->ensurePollingProvisioner();
                 }
             } catch (\Exception $ex) {

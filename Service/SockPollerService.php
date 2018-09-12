@@ -12,10 +12,6 @@ class SockPollerService
     protected $apiService;
     protected $polling;
 
-    const POLLING_TYPE_ACCOUNT = 'accounts';
-    const POLLING_TYPE_APPLICATION = 'applications';
-    const POLLING_TYPE_DATABASE = 'databases';
-
     public function __construct(TaskLoggerService $taskLoggerService, ApiService $apiService)
     {
         $this->taskLoggerService = $taskLoggerService;

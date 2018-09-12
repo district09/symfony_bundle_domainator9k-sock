@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class BuildSockDatabaseProvisioner extends AbstractSockProvisioner
 {
+    const POLLING_TYPE = 'databases';
 
     /**
      * @var ApiService
@@ -88,7 +89,7 @@ class BuildSockDatabaseProvisioner extends AbstractSockProvisioner
             try {
                 $dbId = $this->createSockDatabase($appEnv);
                 if ($dbId) {
-                    $this->sockPoller->addPolling(SockPollerService::POLLING_TYPE_DATABASE, $dbId, $this->task);
+                    $this->sockPoller->addPolling(static::POLLING_TYPE, $dbId, $this->task);
                     $this->ensurePollingProvisioner();
                 }
             } catch (\Exception $ex) {

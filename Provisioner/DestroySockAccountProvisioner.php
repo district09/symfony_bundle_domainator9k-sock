@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
 
 /**
- * Class BuildProvisioner
+ * Class DestroySockAccountProvisioner
  *
  * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
