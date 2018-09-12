@@ -4,13 +4,8 @@
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
-use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\SettingBundle\FieldType\BooleanFieldType;
 use DigipolisGent\SettingBundle\FieldType\StringFieldType;
 use DigipolisGent\SettingBundle\Service\DataValueService;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Class ManageSockFieldType

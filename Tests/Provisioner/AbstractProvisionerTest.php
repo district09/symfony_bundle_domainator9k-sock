@@ -120,7 +120,7 @@ abstract class AbstractProvisionerTest extends TestCase
     protected function getProvisionerMock(array $arguments, array $methods)
     {
         $mock = $this
-            ->getMockBuilder(BuildProvisioner::class)
+            ->getMockBuilder($this->getProvisionerClass())
             ->setMethods(array_keys($methods))
             ->setConstructorArgs($arguments)
             ->getMock();
@@ -187,4 +187,6 @@ abstract class AbstractProvisionerTest extends TestCase
 
         return $method->invokeArgs($provisioner, $args);
     }
+
+    abstract protected function getProvisionerClass();
 }
