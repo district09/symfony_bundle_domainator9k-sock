@@ -127,13 +127,40 @@ class BuildSockApplicationProvisioner extends AbstractSockProvisioner
             );
 
             $application = $this->apiService->findApplicationByName($applicationName, $sockAccountId);
-
+            $aliases = array_unique(
+                array_merge(
+                    [$appEnv->getDomain()],
+                    $this->dataValueService->getValue($appEnv, 'sock_aliases')
+                )
+            );
             if ($application) {
                 $this->taskLoggerService->addInfoLogMessage(
                     $this->task,
                     sprintf('Found application %s.', $application['id']),
                     2
                 );
+
+                // Aliases to remove.
+                $toRemove = array_diff($application['aliases'], $aliases);
+                foreach ($toRemove as $remove) {
+                    $this->apiService->removeApplicationAlias($application['id'], $remove);
+                    $this->taskLoggerService->addInfoLogMessage(
+                        $this->task,
+                        sprintf('Removed alias %s.', $remove),
+                        3
+                    );
+                }
+
+                // Aliases to add.
+                $toAdd = array_diff($aliases, $application['aliases']);
+                foreach ($toAdd as $add) {
+                    $this->apiService->addApplicationAlias($application['id'], $add);
+                    $this->taskLoggerService->addInfoLogMessage(
+                        $this->task,
+                        sprintf('Added alias %s.', $remove),
+                        3
+                    );
+                }
             } else {
                 $this->taskLoggerService->addInfoLogMessage(
                     $this->task,

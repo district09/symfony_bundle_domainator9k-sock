@@ -30,6 +30,10 @@ services:
         public: true
         tags:
             - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\SockAliasesFieldType:
+        public: true
+        tags:
+            - { name: field_type}
     DigipolisGent\Domainator9k\SockBundle\FieldType\SockServerFieldType:
         public: true
         tags:
