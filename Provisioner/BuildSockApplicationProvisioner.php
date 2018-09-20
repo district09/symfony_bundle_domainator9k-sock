@@ -130,7 +130,7 @@ class BuildSockApplicationProvisioner extends AbstractSockProvisioner
             $aliases = array_unique(
                 array_merge(
                     [$appEnv->getDomain()],
-                    $this->dataValueService->getValue($appEnv, 'sock_aliases')
+                    $this->dataValueService->getValue($appEnv, 'sock_aliases') ?: []
                 )
             );
             if ($application) {
