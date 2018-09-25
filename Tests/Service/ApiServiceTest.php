@@ -385,6 +385,7 @@ class ApiServiceTest extends TestCase
                             'headers' => [
                                 'Accept' => 'application/json',
                             ],
+                            'query' => [],
                         ],
                     ];
                     break;
