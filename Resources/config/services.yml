@@ -5,13 +5,32 @@ services:
         public: true
         tags:
             - { name: data_type_provider }
-    DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildProvisioner:
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockAccountProvisioner:
+        tags:
+            - { name: domainator.provisioner.build, priority: 53 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockApplicationProvisioner:
+        tags:
+            - { name: domainator.provisioner.build, priority: 52 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockDatabaseProvisioner:
+        tags:
+            - { name: domainator.provisioner.build, priority: 51 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\PollingProvisioner:
         tags:
             - { name: domainator.provisioner.build, priority: 50 }
-    DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroyProvisioner:
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockDatabaseProvisioner:
         tags:
-            - { name: domainator.provisioner.destroy, priority: 50 }
+            - { name: domainator.provisioner.destroy, priority: 12 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockApplicationProvisioner:
+        tags:
+            - { name: domainator.provisioner.destroy, priority: 11 }
+    DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockAccountProvisioner:
+        tags:
+            - { name: domainator.provisioner.destroy, priority: 10 }
     DigipolisGent\Domainator9k\SockBundle\FieldType\ParentApplicationFieldType:
+        public: true
+        tags:
+            - { name: field_type}
+    DigipolisGent\Domainator9k\SockBundle\FieldType\SockAliasesFieldType:
         public: true
         tags:
             - { name: field_type}

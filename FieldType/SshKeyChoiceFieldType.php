@@ -3,7 +3,6 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-use DigipolisGent\Domainator9k\CiTypes\JenkinsBundle\Entity\GroovyScript;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
