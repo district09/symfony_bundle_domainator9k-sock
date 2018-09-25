@@ -238,6 +238,40 @@ class ApiService
     }
 
     /**
+     * @param $applicationId
+     * @param string $alias
+     * @return mixed
+     */
+    public function removeApplicationAlias(
+        $applicationId,
+        $alias
+    ) {
+        return $this->delete(
+            '/applications/' . $applicationId . '/remove_alias',
+            [
+                'alias' => $alias
+            ]
+        );
+    }
+
+    /**
+     * @param $applicationId
+     * @param string $alias
+     * @return mixed
+     */
+    public function addApplicationAlias(
+        $applicationId,
+        $alias
+    ) {
+        return $this->post(
+            '/applications/' . $applicationId . '/add_alias',
+            [
+                'alias' => $alias
+            ]
+        );
+    }
+
+    /**
      * @param $name
      * @param null $accountId
      * @return bool

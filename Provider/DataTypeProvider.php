@@ -20,6 +20,13 @@ class DataTypeProvider implements DataTypeProviderInterface
 
         return [
             [
+                'key' => 'sock_aliases',
+                'label' => 'Sock URL aliases',
+                'required' => false,
+                'field_type' => 'sock_aliases',
+                'entity_types' => ['application_environment'],
+            ],
+            [
                 'key' => 'sock_server_id',
                 'label' => 'Sock server',
                 'required' => true,
