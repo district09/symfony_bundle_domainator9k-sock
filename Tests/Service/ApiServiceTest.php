@@ -251,6 +251,13 @@ class ApiServiceTest extends TestCase
         $apiService->createDatabase(68, 'testclientsharedruby', 'username', 'password');
     }
 
+    public function testUpdateDatabase()
+    {
+        $result = '';
+        $apiService = $this->getApiServiceMock($result);
+        $apiService->updateDatabaseLogin(uniqid(), 'my-login', 'my-new-pw');
+    }
+
     public function testRemoveDatabaseLogin()
     {
         $apiService = $this->getApiServiceMock([]);
@@ -371,7 +378,8 @@ class ApiServiceTest extends TestCase
             switch ($method) {
                 case 'post':
                 case 'delete':
-                    $key = $method === 'post' ? \GuzzleHttp\RequestOptions::JSON : 'form_params';
+                case 'patch':
+                    $key = $method !== 'delete' ? \GuzzleHttp\RequestOptions::JSON : 'form_params';
                     $parameters = [
                         $parameters[0],
                         [
@@ -385,6 +393,7 @@ class ApiServiceTest extends TestCase
                             'headers' => [
                                 'Accept' => 'application/json',
                             ],
+                            'query' => [],
                         ],
                     ];
                     break;
