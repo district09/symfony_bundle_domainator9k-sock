@@ -244,6 +244,86 @@ class BuildSockDatabaseProvisionerTest extends AbstractProvisionerTest
         $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
+    public function testCreateExistingSockDatabaseChangedLogin()
+    {
+        $application = new FooApplication();
+        $environment = new Environment();
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setApplication($application);
+        $applicationEnvironment->setEnvironment($environment);
+        $applicationEnvironment->setDatabaseUser('my-login');
+        $applicationEnvironment->setDatabasePassword('my-new-pw');
+
+        $entityManagerFunctions = [
+            [
+                'method' => 'persist',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => 1,
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null,
+            ],
+        ];
+
+        $database = [
+            'id' => uniqid(),
+            'database_grants' => [
+                0 => [
+                    'login' => 'my-login'
+                ]
+            ]
+        ];
+
+        $apiServiceFunctions = [
+            [
+                'method' => 'getAccount',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'findDatabaseByName',
+                'willReturn' => $database,
+            ],
+            [
+                'method' => 'updateDatabaseLogin',
+                'with' => [
+                    $database['id'],
+                    $applicationEnvironment->getDatabaseUser(),
+                    $applicationEnvironment->getDatabasePassword()
+                ],
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $apiService->expects($this->never())->method('createDatabase');
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
+
+        $provisioner = new BuildSockDatabaseProvisioner(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager,
+            $sockPoller
+        );
+
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
+    }
+
     public function testOnBuildWithoutDatabase()
     {
         $prodEnvironment = new Environment();
