@@ -50,79 +50,93 @@ class ApiService
      * @param $uri
      * @return mixed
      */
-    private function get($uri, $query = array())
+    private function get($uri, $query = [])
     {
-        $client = $this->getClient();
+        return $this->request('get', $uri, $query);
+    }
 
-        $response = $client->get(
+    /**
+     * @param $uri
+     * @param array $formParams
+     * @return mixed
+     */
+    private function post($uri, $formParams = [])
+    {
+        return $this->request('post', $uri, $formParams);
+    }
+
+    /**
+     * @param $uri
+     * @param array $formParams
+     * @return mixed
+     */
+    private function patch($uri, $formParams = [])
+    {
+        return $this->request('patch', $uri, $formParams);
+    }
+
+    /**
+     * @param $uri
+     * @param array $formParams
+     * @return mixed
+     */
+    private function delete($uri, $formParams = [])
+    {
+        return $this->request('delete', $uri, $formParams);
+    }
+
+    /**
+     * Peform an API request.
+     *
+     * @param string $method
+     *   The request method: get, post, patch or delete.
+     * @param string $uri
+     *   The URI to request.
+     * @param array $data
+     *   Array of request data.
+     *
+     * @return array
+     *   The response body.
+     */
+    private function request(string $method, string $uri, array $data = [])
+    {
+        $dataKey = 'form_params';
+        $query = [];
+
+        switch ($method) {
+            case 'get':
+                $query = $data;
+                $data = [];
+                break;
+
+            case 'post':
+            case 'patch':
+                $dataKey = RequestOptions::JSON;
+                break;
+        }
+
+        $client = $this->getClient();
+        $data = [
+            'client_token' => $this->clientToken,
+            'user_token' => $this->userToken
+        ] + $data;
+
+        $response = $client->$method(
             $this->host . $uri,
             [
-                'form_params' => [
-                    'client_token' => $this->clientToken,
-                    'user_token' => $this->userToken,
-                ],
                 'headers' => [
                     'Accept' => 'application/json',
                 ],
                 'query' => $query,
+                $dataKey => $data,
             ]
         );
 
-        return json_decode($response->getBody()->getContents(), true);
-    }
+        if ($contents = $response->getBody()->getContents()) {
+            return json_decode($contents, true);
+        }
 
-    /**
-     * @param $uri
-     * @param array $formParams
-     * @return mixed
-     */
-    private function post($uri, $formParams = array())
-    {
-        $client = $this->getClient();
-
-        $formParams = array_merge($formParams, [
-            'client_token' => $this->clientToken,
-            'user_token' => $this->userToken
-        ]);
-
-        $response = $client->post(
-            $this->host . $uri,
-            [
-                RequestOptions::JSON => $formParams,
-                'headers' => [
-                    'Accept' => 'application/json',
-                ]
-            ]
-        );
-
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
-    /**
-     * @param $uri
-     * @param array $formParams
-     * @return mixed
-     */
-    private function delete($uri, $formParams = array())
-    {
-        $client = $this->getClient();
-
-        $formParams = array_merge($formParams, [
-            'client_token' => $this->clientToken,
-            'user_token' => $this->userToken
-        ]);
-
-        $response = $client->delete(
-            $this->host . $uri,
-            [
-                'form_params' => $formParams,
-                'headers' => [
-                    'Accept' => 'application/json',
-                ]
-            ]
-        );
-
-        return json_decode($response->getBody()->getContents(), true);
+        return [];
     }
 
     /**
@@ -149,7 +163,7 @@ class ApiService
      * @param $serverId
      * @return mixed
      */
-    public function createAccount($name, $serverId, array $sshKeyIds = array())
+    public function createAccount($name, $serverId, array $sshKeyIds = [])
     {
         return $this->post(
             '/accounts',
@@ -221,7 +235,7 @@ class ApiService
     public function createApplication(
         $accountId,
         $name,
-        $aliases = array(),
+        $aliases = [],
         $documentrootSuffix = 'current',
         $technology = 'php-fpm'
     ) {
@@ -233,6 +247,40 @@ class ApiService
                 'aliases' => $aliases,
                 'documentroot_suffix' => $documentrootSuffix,
                 'technology' => $technology,
+            ]
+        );
+    }
+
+    /**
+     * @param $applicationId
+     * @param string $alias
+     * @return mixed
+     */
+    public function removeApplicationAlias(
+        $applicationId,
+        $alias
+    ) {
+        return $this->delete(
+            '/applications/' . $applicationId . '/remove_alias',
+            [
+                'alias' => $alias
+            ]
+        );
+    }
+
+    /**
+     * @param $applicationId
+     * @param string $alias
+     * @return mixed
+     */
+    public function addApplicationAlias(
+        $applicationId,
+        $alias
+    ) {
+        return $this->post(
+            '/applications/' . $applicationId . '/add_alias',
+            [
+                'alias' => $alias
             ]
         );
     }
@@ -294,6 +342,15 @@ class ApiService
     public function addDatabaseLogin($databaseId, $login, $password)
     {
         $this->post('/databases/' . $databaseId . '/add_login', ['login' => $login, 'password' => $password]);
+    }
+
+    /**
+     * @param $databaseId
+     * @param $login
+     */
+    public function updateDatabaseLogin($databaseId, $login, $password)
+    {
+        $this->patch('/databases/' . $databaseId . '/update_login', ['login' => $login, 'password' => $password]);
     }
 
     /**

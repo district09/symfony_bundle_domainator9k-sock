@@ -12,6 +12,10 @@ use Psr\Http\Message\StreamInterface;
 class ApiServiceTest extends TestCase
 {
 
+    protected $apiHost = 'example.com';
+    protected $apiClientToken = 'client-token';
+    protected $apiUserToken = 'user-token';
+
     /**
      * @expectedException \GuzzleHttp\Exception\RequestException
      */
@@ -247,6 +251,13 @@ class ApiServiceTest extends TestCase
         $apiService->createDatabase(68, 'testclientsharedruby', 'username', 'password');
     }
 
+    public function testUpdateDatabase()
+    {
+        $result = '';
+        $apiService = $this->getApiServiceMock($result);
+        $apiService->updateDatabaseLogin(uniqid(), 'my-login', 'my-new-pw');
+    }
+
     public function testRemoveDatabaseLogin()
     {
         $apiService = $this->getApiServiceMock([]);
@@ -296,25 +307,61 @@ class ApiServiceTest extends TestCase
         $apiService->removeDatabase(5);
     }
 
-    private function getApiServiceMock($result)
+    public function testAddApplicationAlias()
+    {
+        $result = true;
+        $applicationId = uniqid();
+        $alias = uniqid() . '.com';
+        $apiService = $this->getApiServiceMock(
+            $result,
+            'post',
+            [
+                $this->apiHost . '/applications/' . $applicationId . '/add_alias',
+                [
+                    'alias' => $alias
+                ]
+            ]
+        );
+        $this->assertTrue($apiService->addApplicationAlias($applicationId, $alias));
+    }
+
+    public function testRemoveApplicationAlias()
+    {
+        $result = true;
+        $applicationId = uniqid();
+        $alias = uniqid() . '.com';
+        $apiService = $this->getApiServiceMock(
+            $result,
+            'delete',
+            [
+                $this->apiHost . '/applications/' . $applicationId . '/remove_alias',
+                [
+                    'alias' => $alias
+                ]
+            ]
+        );
+        $this->assertTrue($apiService->removeApplicationAlias($applicationId, $alias));
+    }
+
+    private function getApiServiceMock($result, $method = null, $parameters = array())
     {
         $service = new ApiService();
-        $service->setHost('example.com');
-        $service->setClientToken('client-token');
-        $service->setUserToken('user-token');
+        $service->setHost($this->apiHost);
+        $service->setClientToken($this->apiClientToken);
+        $service->setUserToken($this->apiUserToken);
 
         $reflectionObject = new \ReflectionObject($service);
         $property = $reflectionObject->getProperty('client');
         $property->setAccessible(true);
         $property->setValue(
             null,
-            $this->getClientMock($result)
+            $this->getClientMock($result, $method, $parameters)
         );
 
         return $service;
     }
 
-    private function getClientMock($result)
+    private function getClientMock($result, $method = null, $parameters = array())
     {
         $mock = $this
             ->getMockBuilder(Client::class)
@@ -322,12 +369,53 @@ class ApiServiceTest extends TestCase
             ->getMock();
 
         $body = $this->getBodyMock($result);
-        $reponse = $this->getResponseMock($body);
+        $response = $this->getResponseMock($body);
 
-        $mock
+        $methodMock = $mock
             ->expects($this->at(0))
-            ->method('__call')
-            ->willReturn($reponse);
+            ->method('__call');
+        if ($method) {
+            switch ($method) {
+                case 'post':
+                case 'delete':
+                case 'patch':
+                    $key = $method !== 'delete' ? \GuzzleHttp\RequestOptions::JSON : 'form_params';
+                    $parameters = [
+                        $parameters[0],
+                        [
+                            $key => array_merge(
+                                $parameters[1],
+                                [
+                                    'client_token' => $this->apiClientToken,
+                                    'user_token' => $this->apiUserToken,
+                                ]
+                            ),
+                            'headers' => [
+                                'Accept' => 'application/json',
+                            ],
+                            'query' => [],
+                        ],
+                    ];
+                    break;
+                case 'get':
+                    $parameters = [
+                        $parameters[0],
+                        [
+                            'form_params' => [
+                                'client_token' => $this->clientToken,
+                                'user_token' => $this->userToken,
+                            ],
+                            'headers' => [
+                                'Accept' => 'application/json',
+                            ],
+                            'query' => $parameters[1],
+                        ],
+                    ];
+                    break;
+            }
+            $methodMock->with($method, $parameters);
+        }
+        $methodMock->willReturn($response);
 
         return $mock;
     }

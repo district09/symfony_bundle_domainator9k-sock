@@ -180,16 +180,21 @@ class BuildSockDatabaseProvisioner extends AbstractSockProvisioner
                 );
             }
 
-            $login = $database['database_grants'][0]['login'];
-
             $this->taskLoggerService->addInfoLogMessage(
                 $this->task,
                 'Update access grants.',
                 2
             );
 
-            $this->apiService->removeDatabaseLogin($database['id'], $login);
-            $this->apiService->addDatabaseLogin($database['id'], $databaseUser, $databasePassword);
+            $logins = [];
+            foreach ($database['database_grants'] as $grant) {
+                $logins[] = $grant['login'];
+            }
+            if (!in_array($databaseUser, $logins, true)) {
+                $this->apiService->addDatabaseLogin($database['id'], $databaseUser, $databasePassword);
+            } else {
+                $this->apiService->updateDatabaseLogin($database['id'], $databaseUser, $databasePassword);
+            }
 
             $this->dataValueService->storeValue($appEnv, 'sock_database_id', $database['id']);
 
