@@ -3,11 +3,10 @@
 
 namespace DigipolisGent\Domainator9k\SockBundle\FieldType;
 
-use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\SettingBundle\FieldType\AbstractFieldType;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Class SockAliasesFieldType
@@ -25,11 +24,18 @@ class SockAliasesFieldType extends AbstractFieldType
     {
         $options = [];
 
-        $options['entry_type'] = UrlType::class;
+        $options['entry_type'] = TextType::class;
         $options['allow_add'] = true;
         $options['allow_delete'] = true;
         $options['delete_empty'] = true;
         $options['data'] = $this->decodeValue($value);
+        $options['entry_options']['constraints'] = new Regex(
+            [
+                'pattern' => '/^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)*\.[a-z]{2,63}$/',
+                'message' => 'The domain is not valid',
+            ]
+        );
+        $options['entry_options']['attr']['pattern'] = '^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)*\.[a-z]{2,63}$';
 
         return $options;
     }
