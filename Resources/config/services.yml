@@ -55,3 +55,6 @@ services:
         tags:
             - { name: field_type}
     DigipolisGent\Domainator9k\SockBundle\Service\ApiService:
+    DigipolisGent\Domainator9k\SockBundle\EventListener\TaskEventListener:
+        tags:
+            - { name: doctrine.event_listener, event: prePersist, connection: default }

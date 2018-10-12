@@ -5,6 +5,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\Provisioner;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
 use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
+use DigipolisGent\Domainator9k\CoreBundle\Provisioner\AbstractProvisioner;
 use DigipolisGent\Domainator9k\CoreBundle\Service\TaskLoggerService;
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\Domainator9k\SockBundle\Service\SockPollerService;
@@ -16,7 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
  *
  * @package DigipolisGent\Domainator9k\SockBundle\Provisioner
  */
-class BuildSockDatabaseProvisioner extends AbstractSockProvisioner
+class BuildSockDatabaseProvisioner extends AbstractProvisioner
 {
     const POLLING_TYPE = 'databases';
 
@@ -90,7 +91,6 @@ class BuildSockDatabaseProvisioner extends AbstractSockProvisioner
                 $dbId = $this->createSockDatabase($appEnv);
                 if ($dbId) {
                     $this->sockPoller->addPolling(static::POLLING_TYPE, $dbId, $this->task);
-                    $this->ensurePollingProvisioner();
                 }
             } catch (\Exception $ex) {
                 $this->taskLoggerService->addFailedLogMessage($this->task, 'Provisioning sock database failed.');
