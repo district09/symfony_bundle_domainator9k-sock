@@ -39,7 +39,7 @@ class SockPollerService
 
         do {
             $events = false;
-            foreach ($this->polling[$task->getId] as $type => $sockId) {
+            foreach ($this->polling[$task->getId()] as $type => $sockId) {
                 if ($events = $this->apiService->getEvents($type, $sockId)) {
                     break;
                 }
