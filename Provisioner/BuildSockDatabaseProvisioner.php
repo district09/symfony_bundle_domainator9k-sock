@@ -140,7 +140,7 @@ class BuildSockDatabaseProvisioner extends AbstractProvisioner
             }
 
             if (!$databasePassword = $appEnv->getDatabasePassword()) {
-                $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?";
+                $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
                 $databasePassword = substr(str_shuffle($chars), 0, 15);
                 $saveDatabase = true;
             }
