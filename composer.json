@@ -8,7 +8,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.1",
-    "symfony/cache": "^5.5",
+    "symfony/cache": "^5.0",
     "doctrine/orm": "^2.5",
     "digipolisgent/domainator9k-core-bundle": "^3.0|dev-feature/symfony5",
     "guzzlehttp/guzzle": "^7.2"
