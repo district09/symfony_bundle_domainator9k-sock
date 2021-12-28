@@ -50,11 +50,11 @@ class SockAliasesFieldType extends AbstractFieldType
 
     public function decodeValue($value)
     {
-        return $value ? json_decode($value, true) : [];
+        return $value ? array_values(json_decode($value, true)) : [];
     }
 
     public function encodeValue($value): ?string
     {
-        return json_encode($value ? $value : []);
+        return json_encode($value ? array_values($value) : []);
     }
 }
