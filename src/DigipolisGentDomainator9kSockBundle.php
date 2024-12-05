@@ -14,8 +14,7 @@ class DigipolisGentDomainator9kSockBundle extends AbstractBundle
     #[\Override]
     public function configure(DefinitionConfigurator $definition): void
     {
-        $definition->getRootNode();
-        $rootNode
+        $definition->rootNode()
             ->children()
             ->scalarNode('host')->cannotBeEmpty()->end()
             ->scalarNode('user_token')->cannotBeEmpty()->end()
