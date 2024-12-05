@@ -20,7 +20,7 @@
   "autoload": {
     "psr-4": {
       "DigipolisGent\\Domainator9k\\SockBundle\\": "src",
-      "DigipolisGent\\Domainator9k\\SockBundle\\Tests": "tests"
+      "DigipolisGent\\Domainator9k\\SockBundle\\Tests\\": "tests"
     }
   }
 }
