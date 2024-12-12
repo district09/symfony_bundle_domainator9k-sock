@@ -6,11 +6,13 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
 use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockAccountProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Service\SockPollerService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
+use Psr\Http\Message\ResponseInterface;
 
 class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
 {
@@ -158,12 +160,10 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage The parent application must be build first.
-     */
     public function testCreateSockAccountWithParentApplicationNotBuilt()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The parent application must be build first.');
         $application = new FooApplication();
 
         $applicationEnvironment = new ApplicationEnvironment();
@@ -275,7 +275,7 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
             ],
             [
                 'method' => 'createAccount',
-                'willReturn' => null,
+                'willReturn' => ['id' => 1],
             ],
         ];
 
@@ -368,11 +368,9 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
     public function testOnBuildWithException()
     {
+        $this->expectException(LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);
@@ -440,7 +438,7 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         ];
         $methods = [
             'createSockAccount' => function () {
-                throw new ClientException('This is an exception.', $this->getRequestMock());
+                throw new ClientException('This is an exception.', $this->getRequestMock(), $this->getMockBuilder(ResponseInterface::class)->getMock());
             },
         ];
 

@@ -6,10 +6,12 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
 use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockDatabaseProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
+use Psr\Http\Message\ResponseInterface;
 
 class DestroySockDatabaseProvisionerTest extends AbstractProvisionerTest
 {
@@ -106,11 +108,9 @@ class DestroySockDatabaseProvisionerTest extends AbstractProvisionerTest
         $provisioner->run();
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
     public function testOnDestroyWithException()
     {
+        $this->expectException(LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);
@@ -170,10 +170,10 @@ class DestroySockDatabaseProvisionerTest extends AbstractProvisionerTest
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $apiService
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('removeDatabase')
             ->willReturnCallback(function () {
-                throw new ClientException('This is an exception.', $this->getRequestMock());
+                throw new ClientException('This is an exception.', $this->getRequestMock(), $this->getMockBuilder(ResponseInterface::class)->getMock());
             });
 
         $task = new Task();

@@ -5,6 +5,7 @@ namespace DigipolisGent\Domainator9k\SockBundle\Tests\Service;
 
 use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -16,11 +17,9 @@ class ApiServiceTest extends TestCase
     protected $apiClientToken = 'client-token';
     protected $apiUserToken = 'user-token';
 
-    /**
-     * @expectedException \GuzzleHttp\Exception\RequestException
-     */
     public function testRequestException()
     {
+        $this->expectException(RequestException::class);
         $service = new ApiService();
         $service->getAccount('random');
     }
@@ -102,8 +101,14 @@ class ApiServiceTest extends TestCase
             "virtual_server_id" => 3,
         ];
 
-        $apiService = $this->getApiServiceMock($result);
-        $apiService->createAccount('application-name', 68);
+        $data = [
+            'name' => 'account-name',
+            'virtual_server_id' => 68,
+            'ssh_key_ids' => []
+        ];
+
+        $apiService = $this->getApiServiceMock($result, 'post', ['/accounts', $data]);
+        $apiService->createAccount('account-name', 68);
     }
 
     public function testGetVirtualServer()
@@ -184,15 +189,20 @@ class ApiServiceTest extends TestCase
         $application = [
             "account_id" => 7,
             "created_at" => "2013-03-14T14:03:16+01:00",
-            "aliases" => [
-                "www.example.com"
-            ],
-            "documentroot_suffix" => "public_html",
+            "aliases" => [],
+            "documentroot_suffix" => "current",
             "id" => 13,
             "name" => "exampleapp"
         ];
 
-        $apiService = $this->getApiServiceMock($application);
+        $data = [
+            'account_id' => 7,
+            'name' => 'exampleapp',
+            'aliases' => [],
+            'documentroot_suffix' => 'current',
+            'technology' => 'php-fpm',
+        ];
+        $apiService = $this->getApiServiceMock($application, 'post', ['/applications', $data]);
         $apiService->createApplication(7, 'exampleapp');
     }
 
@@ -247,20 +257,29 @@ class ApiServiceTest extends TestCase
             'account_id'
         ];
 
-        $apiService = $this->getApiServiceMock($result);
+        $data = [
+            'account_id' => 68,
+            'name' => 'testclientsharedruby',
+            'login' => 'username',
+            'password' => 'password',
+        ];
+
+        $apiService = $this->getApiServiceMock($result, 'post', ['/databases', $data]);
         $apiService->createDatabase(68, 'testclientsharedruby', 'username', 'password');
     }
 
     public function testUpdateDatabase()
     {
         $result = '';
-        $apiService = $this->getApiServiceMock($result);
-        $apiService->updateDatabaseLogin(uniqid(), 'my-login', 'my-new-pw');
+        $databaseId = uniqid();
+        $data = ['login' => 'my-login', 'password' => 'my-new-pw'];
+        $apiService = $this->getApiServiceMock($result, 'patch', ['/databases/' . $databaseId . '/update_login', $data]);
+        $apiService->updateDatabaseLogin($databaseId, 'my-login', 'my-new-pw');
     }
 
     public function testRemoveDatabaseLogin()
     {
-        $apiService = $this->getApiServiceMock([]);
+        $apiService = $this->getApiServiceMock([], 'delete', ['/databases/68/remove_login', ['login' => 'testclientsharedruby']]);
         $apiService->removeDatabaseLogin(68, 'testclientsharedruby');
     }
 
@@ -272,7 +291,9 @@ class ApiServiceTest extends TestCase
             'account_id'
         ];
 
-        $apiService = $this->getApiServiceMock($result);
+        $data = ['login' => 'user', 'password' => 'password'];
+
+        $apiService = $this->getApiServiceMock($result, 'post', ['/databases/68/add_login', $data]);
         $apiService->addDatabaseLogin(68, 'user', 'password');
     }
 
@@ -291,19 +312,19 @@ class ApiServiceTest extends TestCase
 
     public function testRemoveAccount()
     {
-        $apiService = $this->getApiServiceMock([]);
+        $apiService = $this->getApiServiceMock([], 'delete', ['/accounts/1']);
         $apiService->removeAccount(1);
     }
 
     public function testRemoveApplication()
     {
-        $apiService = $this->getApiServiceMock([]);
+        $apiService = $this->getApiServiceMock([], 'delete', ['/applications/68']);
         $apiService->removeApplication(68);
     }
 
     public function testRemoveDatabase()
     {
-        $apiService = $this->getApiServiceMock([]);
+        $apiService = $this->getApiServiceMock([], 'delete', ['/databases/5']);
         $apiService->removeDatabase(5);
     }
 
@@ -316,7 +337,7 @@ class ApiServiceTest extends TestCase
             $result,
             'post',
             [
-                $this->apiHost . '/applications/' . $applicationId . '/add_alias',
+                '/applications/' . $applicationId . '/add_alias',
                 [
                     'alias' => $alias
                 ]
@@ -334,7 +355,7 @@ class ApiServiceTest extends TestCase
             $result,
             'delete',
             [
-                $this->apiHost . '/applications/' . $applicationId . '/remove_alias',
+                '/applications/' . $applicationId . '/remove_alias',
                 [
                     'alias' => $alias
                 ]
@@ -343,7 +364,7 @@ class ApiServiceTest extends TestCase
         $this->assertTrue($apiService->removeApplicationAlias($applicationId, $alias));
     }
 
-    private function getApiServiceMock($result, $method = null, $parameters = array())
+    private function getApiServiceMock($result, $method = 'get', $parameters = array())
     {
         $service = new ApiService();
         $service->setHost($this->apiHost);
@@ -361,7 +382,7 @@ class ApiServiceTest extends TestCase
         return $service;
     }
 
-    private function getClientMock($result, $method = null, $parameters = array())
+    private function getClientMock($result, $method = 'get', $parameters = array())
     {
         $mock = $this
             ->getMockBuilder(Client::class)
@@ -372,8 +393,8 @@ class ApiServiceTest extends TestCase
         $response = $this->getResponseMock($body);
 
         $methodMock = $mock
-            ->expects($this->at(0))
-            ->method('__call');
+            ->expects($this->atLeastOnce())
+            ->method($method);
         if ($method) {
             switch ($method) {
                 case 'post':
@@ -381,10 +402,10 @@ class ApiServiceTest extends TestCase
                 case 'patch':
                     $key = $method !== 'delete' ? \GuzzleHttp\RequestOptions::JSON : 'form_params';
                     $parameters = [
-                        $parameters[0],
+                        $this->apiHost . $parameters[0],
                         [
                             $key => array_merge(
-                                $parameters[1],
+                                $parameters[1] ?? [],
                                 [
                                     'client_token' => $this->apiClientToken,
                                     'user_token' => $this->apiUserToken,
@@ -398,22 +419,27 @@ class ApiServiceTest extends TestCase
                     ];
                     break;
                 case 'get':
+                    if (count($parameters) < 2) {
+                      break;
+                    }
                     $parameters = [
-                        $parameters[0],
+                        $this->apiHost . $parameters[0],
                         [
-                            'form_params' => [
+                        'form_params' => [
                                 'client_token' => $this->clientToken,
                                 'user_token' => $this->userToken,
-                            ],
-                            'headers' => [
-                                'Accept' => 'application/json',
-                            ],
-                            'query' => $parameters[1],
+                        ],
+                        'headers' => [
+                            'Accept' => 'application/json',
+                        ],
+                        'query' => $parameters[1],
                         ],
                     ];
                     break;
             }
-            $methodMock->with($method, $parameters);
+            if ($parameters) {
+                $methodMock->with(...$parameters);
+            }
         }
         $methodMock->willReturn($response);
 
@@ -428,7 +454,7 @@ class ApiServiceTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getContents')
             ->willReturn(json_encode($result));
 
@@ -443,7 +469,7 @@ class ApiServiceTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getBody')
             ->willReturn($body);
 

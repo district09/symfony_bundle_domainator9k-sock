@@ -70,11 +70,9 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $provisioner->run();
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
     public function testPollingFailed()
     {
+        $this->expectException(\DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);

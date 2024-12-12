@@ -102,7 +102,7 @@ class DestroySockAccountProvisioner extends AbstractProvisioner
         }
 
         if ($this->dataValueService->getValue($application, 'parent_application')) {
-            $this->taskLoggerService->addInfoLogMessage($this->task, 'Using parent application account.', 2);
+            $this->taskLoggerService->addInfoLogMessage($this->task, 'Using parent application account, not destroying account.', 2);
             return;
         }
 

@@ -47,7 +47,7 @@ class SshKeyChoiceFieldTypeTest extends TestCase
         }
 
         $apiService
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getSshKeys')
             ->willReturn($sshKeys);
 
@@ -84,12 +84,12 @@ class SshKeyChoiceFieldTypeTest extends TestCase
         }
 
         $apiService
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getSshKeys')
             ->willReturn($sshKeys);
 
         $dataValueService
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getValue')
             ->willReturn(['1','5','6','8']);
 
