@@ -1,8 +1,13 @@
+dist: jammy
 language: php
 
 php:
-  - 7.1
-  - 7.2
+  - 8.3
+  - 8.4
+
+matrix:
+  allow_failures:
+    - php: 8.4
 
 before_install:
   - echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
@@ -18,7 +23,7 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  - vendor/bin/phpunit --disallow-test-output --strict-coverage -d error_reporting=-1 --coverage-clover=build/logs/clover.xml Tests
+  - vendor/bin/phpunit --disallow-test-output --strict-coverage -d error_reporting=-1 --coverage-clover=build/logs/clover.xml tests
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

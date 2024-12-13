@@ -66,7 +66,7 @@ class ManageSockFieldTypeTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('findBy')
             ->with($this->equalTo(['environment' => $environment]))
             ->willReturn($servers);
@@ -82,7 +82,7 @@ class ManageSockFieldTypeTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getRepository')
             ->with(VirtualServer::class)
             ->willReturn($serverRepository);
@@ -98,7 +98,7 @@ class ManageSockFieldTypeTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getValue')
             ->willReturn($returnValue);
 

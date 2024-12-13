@@ -27,7 +27,7 @@ abstract class AbstractProvisionerTest extends TestCase
             ->getMock();
 
         $mock
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method($method)
             ->willReturn($returnValue);
 
@@ -41,17 +41,15 @@ abstract class AbstractProvisionerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $index = 0;
+        $methods = [];
         foreach ($functions as $functionArr) {
-            $method = $functionArr['method'];
-            $willReturn = $functionArr['willReturn'];
-
-            $mock
-                ->expects($this->at($index))
+            $methods[$functionArr['method']] ??= [];
+            $methods[$functionArr['method']][] = $functionArr['willReturn'];
+        }
+        foreach ($methods as $method => $returns) {
+            $mock->expects($this->any())
                 ->method($method)
-                ->willReturn($willReturn);
-
-            $index++;
+                ->willReturnOnConsecutiveCalls(...$returns);
         }
 
         return $mock;
@@ -74,20 +72,18 @@ abstract class AbstractProvisionerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $index = 0;
         foreach ($functions as $functionArr) {
             $method = $functionArr['method'];
             $willReturn = $functionArr['willReturn'];
 
             $method = $mock
-                ->expects($this->at($index))
+                ->expects($this->atLeastOnce())
                 ->method($method);
             if (isset($functionArr['with'])) {
                 call_user_func_array([$method, 'with'], $functionArr['with']);
             }
             $method->willReturn($willReturn);
 
-            $index++;
         }
 
         return $mock;
@@ -100,19 +96,17 @@ abstract class AbstractProvisionerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $index = 0;
+        $methods = [];
         foreach ($functions as $functionArr) {
-            $method = $functionArr['method'];
-            $willReturn = $functionArr['willReturn'];
-
-            $mock
-                ->expects($this->at($index))
-                ->method($method)
-                ->willReturn($willReturn);
-
-            $index++;
+            $methods[$functionArr['method']] ??= [];
+            $methods[$functionArr['method']][] = $functionArr['willReturn'];
         }
 
+        foreach ($methods as $method => $returns) {
+            $mock->expects($this->any())
+                ->method($method)
+                ->willReturnOnConsecutiveCalls(...$returns);
+        }
 
         return $mock;
     }

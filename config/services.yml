@@ -55,7 +55,7 @@ services:
         tags:
             - { name: field_type}
     DigipolisGent\Domainator9k\SockBundle\Service\:
-        resource: "../../Service"
+        resource: "../src/Service"
     DigipolisGent\Domainator9k\SockBundle\EventListener\TaskEventListener:
         tags:
             - { name: doctrine.event_listener, event: prePersist, connection: default }
