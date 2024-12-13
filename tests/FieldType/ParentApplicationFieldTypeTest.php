@@ -41,13 +41,13 @@ class ParentApplicationFieldTypeTest extends TestCase
     {
         $repository = $this->getApplicationRepositoryMock();
         $repository
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('find')
             ->willReturn(new FooApplication());
 
         $entityManager = $this->getEntityManagerMock();
         $entityManager
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getRepository')
             ->with(AbstractApplication::class)
             ->willReturn($repository);
@@ -70,31 +70,31 @@ class ParentApplicationFieldTypeTest extends TestCase
     public function testGetOptions()
     {
         $applications = new ArrayCollection();
-
+        $randomIds = range(0, 1000);
         $applicationOne = new FooApplication();
         $applicationOne->setName('Foo one');
-        $applicationOne->setId('foo-id-one');
+        $applicationOne->setId(array_rand($randomIds));
         $applications->add($applicationOne);
 
         $applicationTwo = new FooApplication();
         $applicationTwo->setName('Foo two');
-        $applicationTwo->setId('foo-id-two');
+        $applicationTwo->setId(array_rand($randomIds));
         $applications->add($applicationTwo);
 
         $applicationThree = new FooApplication();
         $applicationThree->setName('Foo three');
-        $applicationThree->setId('foo-id-three');
+        $applicationThree->setId(array_rand($randomIds));
         $applications->add($applicationThree);
 
         $repository = $this->getApplicationRepositoryMock();
         $repository
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('findBy')
             ->willReturn($applications);
 
         $entityManager = $this->getEntityManagerMock();
         $entityManager
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getRepository')
             ->with(AbstractApplication::class)
             ->willReturn($repository);

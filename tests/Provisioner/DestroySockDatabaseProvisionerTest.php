@@ -6,15 +6,17 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\SockBundle\Provisioner\PollingProvisioner;
-use DigipolisGent\Domainator9k\SockBundle\Service\SockPollerService;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockDatabaseProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
+use GuzzleHttp\Exception\ClientException;
+use Psr\Http\Message\ResponseInterface;
 
-class PollingProvisionerTest extends AbstractProvisionerTest
+class DestroySockDatabaseProvisionerTest extends AbstractProvisionerTest
 {
 
-    public function testOnBuild()
+    public function testOnDestroy()
     {
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
@@ -45,11 +47,46 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $applicationEnvironment->setEnvironment($prodEnvironment);
         $applicationEnvironment->setApplication($application);
 
-        $entityManagerFunctions = [];
+        $entityManagerFunctions = [
+            [
+                'method' => 'getRepository',
+                'willReturn' => $this->getRepositoryMock('findAll', $servers)
+            ],
+            [
+                'method' => 'persist',
+                'willReturn' => null
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null
+            ]
+        ];
 
-        $dataValueServiceFunctions = [];
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => null
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => true
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => 5
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null
+            ],
+        ];
 
-        $apiServiceFunctions = [];
+        $apiServiceFunctions = [
+            [
+                'method' => 'removeDatabase',
+                'willReturn' => null
+            ]
+        ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskLoggerService = $this->getTaskLoggerServiceMock();
@@ -57,24 +94,23 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $task = new Task();
-        $task->setType(Task::TYPE_BUILD);
+        $task->setType(Task::TYPE_DESTROY);
         $task->setStatus(Task::STATUS_NEW);
-        $task->setProvisioners([BuildSockAccountProvisioner::class]);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $sockPoller = $this->getMockBuilder(SockPollerService::class)->setConstructorArgs([$taskLoggerService, $apiService])->getMock();
-        $sockPoller->expects($this->once())->method('doPolling')->with($task);
-
-        $provisioner = new PollingProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager, $sockPoller);
+        $provisioner = new DestroySockDatabaseProvisioner(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager
+        );
         $provisioner->setTask($task);
         $provisioner->run();
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
-    public function testPollingFailed()
+    public function testOnDestroyWithException()
     {
+        $this->expectException(LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);
@@ -104,9 +140,27 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $applicationEnvironment->setEnvironment($prodEnvironment);
         $applicationEnvironment->setApplication($application);
 
-        $entityManagerFunctions = [];
+        $entityManagerFunctions = [
+            [
+                'method' => 'getRepository',
+                'willReturn' => $this->getRepositoryMock('findAll', $servers)
+            ],
+        ];
 
-        $dataValueServiceFunctions = [];
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => false
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => true
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => 5
+            ],
+        ];
 
         $apiServiceFunctions = [];
 
@@ -115,18 +169,24 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
+        $apiService
+            ->expects($this->atLeastOnce())
+            ->method('removeDatabase')
+            ->willReturnCallback(function () {
+                throw new ClientException('This is an exception.', $this->getRequestMock(), $this->getMockBuilder(ResponseInterface::class)->getMock());
+            });
+
         $task = new Task();
-        $task->setType(Task::TYPE_BUILD);
+        $task->setType(Task::TYPE_DESTROY);
         $task->setStatus(Task::STATUS_NEW);
-        $task->setProvisioners([BuildSockAccountProvisioner::class]);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $sockPoller = $this->getMockBuilder(SockPollerService::class)->setConstructorArgs([$taskLoggerService, $apiService])->getMock();
-        $sockPoller->expects($this->once())->method('doPolling')
-            ->with($task)
-            ->willThrowException(new \Exception());
-
-        $provisioner = new PollingProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager, $sockPoller);
+        $provisioner = new DestroySockDatabaseProvisioner(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager
+        );
         $provisioner->setTask($task);
         $provisioner->run();
     }
@@ -137,19 +197,13 @@ class PollingProvisionerTest extends AbstractProvisionerTest
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock();
         $entityManager = $this->getEntityManagerMock();
-        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
-        $provisioner = new PollingProvisioner(
-            $dataValueService,
-            $taskLoggerService,
-            $apiService,
-            $entityManager,
-            $sockPoller
-        );
-        $this->assertEquals($provisioner->getName(), 'Polling for sock accounts, applications and databases');
+        $provisioner = new DestroySockDatabaseProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock database');
     }
 
     protected function getProvisionerClass()
     {
-        return PollingProvisioner::class;
+      DestroySockDatabaseProvisioner::class;
     }
+
 }

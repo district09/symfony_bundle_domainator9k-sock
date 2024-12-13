@@ -6,12 +6,14 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockAccountProvisioner;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\DestroySockApplicationProvisioner;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
+use Psr\Http\Message\ResponseInterface;
 
-class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
+class DestroySockApplicationProvisionerTest extends AbstractProvisionerTest
 {
 
     public function testOnDestroy()
@@ -77,19 +79,11 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
                 'method' => 'storeValue',
                 'willReturn' => null
             ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 10
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null
-            ],
         ];
 
         $apiServiceFunctions = [
             [
-                'method' => 'removeAccount',
+                'method' => 'removeApplication',
                 'willReturn' => null
             ]
         ];
@@ -104,7 +98,7 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $provisioner = new DestroySockAccountProvisioner(
+        $provisioner = new DestroySockApplicationProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
@@ -114,11 +108,9 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
         $provisioner->run();
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
     public function testOnDestroyWithException()
     {
+        $this->expectException(LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);
@@ -178,10 +170,10 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
 
         $apiService
-            ->expects($this->at(0))
-            ->method('removeAccount')
+            ->expects($this->atLeastOnce())
+            ->method('removeApplication')
             ->willReturnCallback(function () {
-                throw new ClientException('This is an exception.', $this->getRequestMock());
+                throw new ClientException('This is an exception.', $this->getRequestMock(), $this->getMockBuilder(ResponseInterface::class)->getMock());
             });
 
         $task = new Task();
@@ -189,7 +181,7 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
         $task->setStatus(Task::STATUS_NEW);
         $task->setApplicationEnvironment($applicationEnvironment);
 
-        $provisioner = new DestroySockAccountProvisioner(
+        $provisioner = new DestroySockApplicationProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
@@ -205,13 +197,13 @@ class DestroySockAccountProvisionerTest extends AbstractProvisionerTest
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock();
         $entityManager = $this->getEntityManagerMock();
-        $provisioner = new DestroySockAccountProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
-        $this->assertEquals($provisioner->getName(), 'Sock account');
+        $provisioner = new DestroySockApplicationProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager);
+        $this->assertEquals($provisioner->getName(), 'Sock application');
     }
 
     protected function getProvisionerClass()
     {
-      DestroySockAccountProvisioner::class;
+      DestroySockApplicationProvisioner::class;
     }
 
 }

@@ -6,16 +6,19 @@ use DigipolisGent\Domainator9k\CoreBundle\Entity\ApplicationEnvironment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Environment;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\Task;
 use DigipolisGent\Domainator9k\CoreBundle\Entity\VirtualServer;
-use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockAccountProvisioner;
+use DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException;
+use DigipolisGent\Domainator9k\SockBundle\Provisioner\BuildSockDatabaseProvisioner;
+use DigipolisGent\Domainator9k\SockBundle\Service\ApiService;
 use DigipolisGent\Domainator9k\SockBundle\Service\SockPollerService;
 use DigipolisGent\Domainator9k\SockBundle\Tests\Fixtures\FooApplication;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Exception\ClientException;
+use Psr\Http\Message\ResponseInterface;
 
-class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
+class BuildSockDatabaseProvisionerTest extends AbstractProvisionerTest
 {
 
-    public function testOnBuild()
+    public function testOnBuildWithDatabase()
     {
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
@@ -70,26 +73,25 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
+
 
         $task = new Task();
         $task->setType(Task::TYPE_BUILD);
         $task->setStatus(Task::STATUS_NEW);
-        $task->setProvisioners([BuildSockAccountProvisioner::class]);
         $task->setApplicationEnvironment($applicationEnvironment);
-
-        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
 
         $arguments = [
             $dataValueService,
             $taskLoggerService,
             $apiService,
             $entityManager,
-            $sockPoller
+            $sockPoller,
         ];
         $methods = [
-            'createSockAccount' => function () {
-                return 1;
-            },
+            'createSockDatabase' => function () {
+                return 3;
+            }
         ];
 
         $provisioner = $this->getProvisionerMock($arguments, $methods);
@@ -97,168 +99,32 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $provisioner->run();
     }
 
-    public function testCreateSockAccountWithParentApplication()
+    public function testCreateSockDatabase()
     {
         $application = new FooApplication();
+        $environment = new Environment();
 
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
-        $server = new VirtualServer();
-
-        $parentApplication = new FooApplication();
-
+        $applicationEnvironment->setEnvironment($environment);
 
         $entityManagerFunctions = [
             [
-                'method' => 'getRepository',
-                'willReturn' => $this->getRepositoryMock('findOneBy', new FooApplication()),
-            ]
+                'method' => 'persist',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null,
+            ],
         ];
 
         $dataValueServiceFunctions = [
-            [
-                'method' => 'getValue',
-                'willReturn' => $parentApplication
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 1
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 'username'
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 1
-            ],
-        ];
-
-        $apiServiceFunctions = [
-            [
-                'method' => 'getVirtualServer',
-                'willReturn' => null
-            ]
-        ];
-
-        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskLoggerService = $this->getTaskLoggerServiceMock();
-        $apiService = $this->getApiServiceMock($apiServiceFunctions);
-        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
-        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
-
-        $provisioner = new BuildSockAccountProvisioner(
-            $dataValueService,
-            $taskLoggerService,
-            $apiService,
-            $entityManager,
-            $sockPoller
-        );
-
-        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage The parent application must be build first.
-     */
-    public function testCreateSockAccountWithParentApplicationNotBuilt()
-    {
-        $application = new FooApplication();
-
-        $applicationEnvironment = new ApplicationEnvironment();
-        $applicationEnvironment->setApplication($application);
-        $server = new VirtualServer();
-
-        $parentApplication = new FooApplication();
-
-
-        $entityManagerFunctions = [
-            [
-                'method' => 'getRepository',
-                'willReturn' => $this->getRepositoryMock('findOneBy', new FooApplication()),
-            ]
-        ];
-
-        $dataValueServiceFunctions = [
-            [
-                'method' => 'getValue',
-                'willReturn' => $parentApplication
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 1
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => null
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => 1
-            ],
-        ];
-
-        $apiServiceFunctions = [
-            [
-                'method' => 'getVirtualServer',
-                'willReturn' => null
-            ]
-        ];
-
-        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
-        $taskLoggerService = $this->getTaskLoggerServiceMock();
-        $apiService = $this->getApiServiceMock($apiServiceFunctions);
-        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
-        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
-
-        $provisioner = new BuildSockAccountProvisioner(
-            $dataValueService,
-            $taskLoggerService,
-            $apiService,
-            $entityManager,
-            $sockPoller
-        );
-
-        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
-    }
-
-    public function testCreateSockAccountWithoutParentApplication()
-    {
-        $application = new FooApplication();
-
-        $applicationEnvironment = new ApplicationEnvironment();
-        $applicationEnvironment->setApplication($application);
-        $server = new VirtualServer();
-
-
-        $entityManagerFunctions = [
-        ];
-
-        $dataValueServiceFunctions = [
-            [
-                'method' => 'getValue',
-                'willReturn' => false,
-            ],
             [
                 'method' => 'getValue',
                 'willReturn' => 1,
             ],
             [
-                'method' => 'getValue',
-                'willReturn' => [
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                ]
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null,
-            ],
-            [
                 'method' => 'storeValue',
                 'willReturn' => null,
             ],
@@ -266,15 +132,26 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
 
         $apiServiceFunctions = [
             [
-                'method' => 'getVirtualServer',
+                'method' => 'getAccount',
                 'willReturn' => null,
             ],
             [
-                'method' => 'findAccountByName',
+                'method' => 'findDatabaseByName',
                 'willReturn' => null,
             ],
             [
-                'method' => 'createAccount',
+                'method' => 'createDatabase',
+                'willReturn' => [
+                    'id' => 10,
+                    'database_grants' => [
+                        0 => [
+                            'login' => 'my-login'
+                        ]
+                    ]
+                ],
+            ],
+            [
+                'method' => 'addDatabaseLogin',
                 'willReturn' => null,
             ],
         ];
@@ -285,7 +162,7 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
         $sockPoller = new SockPollerService($taskLoggerService, $apiService);
 
-        $provisioner = new BuildSockAccountProvisioner(
+        $provisioner = new BuildSockDatabaseProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
@@ -293,43 +170,33 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
             $sockPoller
         );
 
-        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
-    public function testCreateExistingSockAccount()
+    public function testCreateExistingSockDatabase()
     {
         $application = new FooApplication();
+        $environment = new Environment();
 
         $applicationEnvironment = new ApplicationEnvironment();
         $applicationEnvironment->setApplication($application);
-        $server = new VirtualServer();
-
+        $applicationEnvironment->setEnvironment($environment);
 
         $entityManagerFunctions = [
+            [
+                'method' => 'persist',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null,
+            ],
         ];
 
         $dataValueServiceFunctions = [
             [
                 'method' => 'getValue',
-                'willReturn' => false,
-            ],
-            [
-                'method' => 'getValue',
                 'willReturn' => 1,
-            ],
-            [
-                'method' => 'getValue',
-                'willReturn' => [
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                ]
-            ],
-            [
-                'method' => 'storeValue',
-                'willReturn' => null,
             ],
             [
                 'method' => 'storeValue',
@@ -337,27 +204,38 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
             ],
         ];
 
-        $account = ['id' => uniqid()];
+        $database = [
+            'id' => uniqid(),
+            'database_grants' => [
+                0 => [
+                    'login' => 'my-login'
+                ]
+            ]
+        ];
 
         $apiServiceFunctions = [
             [
-                'method' => 'getVirtualServer',
+                'method' => 'getAccount',
                 'willReturn' => null,
             ],
             [
-                'method' => 'findAccountByName',
-                'willReturn' => $account,
+                'method' => 'findDatabaseByName',
+                'willReturn' => $database,
+            ],
+            [
+                'method' => 'addDatabaseLogin',
+                'willReturn' => null,
             ],
         ];
 
         $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
         $taskLoggerService = $this->getTaskLoggerServiceMock();
         $apiService = $this->getApiServiceMock($apiServiceFunctions);
-        $apiService->expects($this->never())->method('createAccount');
+        $apiService->expects($this->never())->method('createDatabase');
         $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
         $sockPoller = new SockPollerService($taskLoggerService, $apiService);
 
-        $provisioner = new BuildSockAccountProvisioner(
+        $provisioner = new BuildSockDatabaseProvisioner(
             $dataValueService,
             $taskLoggerService,
             $apiService,
@@ -365,14 +243,174 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
             $sockPoller
         );
 
-        $this->invokeProvisionerMethod($provisioner, 'createSockAccount', $applicationEnvironment, $server);
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
     }
 
-    /**
-     * @expectedException \DigipolisGent\Domainator9k\CoreBundle\Exception\LoggedException
-     */
+    public function testCreateExistingSockDatabaseChangedLogin()
+    {
+        $application = new FooApplication();
+        $environment = new Environment();
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setApplication($application);
+        $applicationEnvironment->setEnvironment($environment);
+        $applicationEnvironment->setDatabaseUser('my-login');
+        $applicationEnvironment->setDatabasePassword('my-new-pw');
+
+        $entityManagerFunctions = [
+            [
+                'method' => 'persist',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'flush',
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => 1,
+            ],
+            [
+                'method' => 'storeValue',
+                'willReturn' => null,
+            ],
+        ];
+
+        $database = [
+            'id' => uniqid(),
+            'database_grants' => [
+                0 => [
+                    'login' => 'my-login'
+                ]
+            ]
+        ];
+
+        $apiServiceFunctions = [
+            [
+                'method' => 'getAccount',
+                'willReturn' => null,
+            ],
+            [
+                'method' => 'findDatabaseByName',
+                'willReturn' => $database,
+            ],
+            [
+                'method' => 'updateDatabaseLogin',
+                'with' => [
+                    $database['id'],
+                    $applicationEnvironment->getDatabaseUser(),
+                    $applicationEnvironment->getDatabasePassword()
+                ],
+                'willReturn' => null,
+            ],
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this->getApiServiceMock($apiServiceFunctions);
+        $apiService->expects($this->never())->method('createDatabase');
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
+
+        $provisioner = new BuildSockDatabaseProvisioner(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager,
+            $sockPoller
+        );
+
+        $this->invokeProvisionerMethod($provisioner, 'createSockDatabase', $applicationEnvironment);
+    }
+
+    public function testOnBuildWithoutDatabase()
+    {
+        $prodEnvironment = new Environment();
+        $prodEnvironment->setName('prod');
+        $prodEnvironment->setProd(true);
+
+        $uatEnvironment = new Environment();
+        $uatEnvironment->setName('uat');
+        $uatEnvironment->setProd(true);
+
+        $servers = new ArrayCollection();
+
+        $serverOne = new VirtualServer();
+        $serverOne->setEnvironment($uatEnvironment);
+        $servers->add($serverOne);
+
+        $serverTwo = new VirtualServer();
+        $serverTwo->setEnvironment($prodEnvironment);
+        $servers->add($serverTwo);
+
+        $serverThree = new VirtualServer();
+        $serverThree->setEnvironment($prodEnvironment);
+        $servers->add($serverThree);
+
+        $application = new FooApplication();
+        $application->setHasDatabase(false);
+
+        $applicationEnvironment = new ApplicationEnvironment();
+        $applicationEnvironment->setEnvironment($prodEnvironment);
+        $applicationEnvironment->setApplication($application);
+
+        $entityManagerFunctions = [
+            [
+                'method' => 'getRepository',
+                'willReturn' => $this->getRepositoryMock('findAll', $servers)
+            ]
+        ];
+
+        $dataValueServiceFunctions = [
+            [
+                'method' => 'getValue',
+                'willReturn' => false
+            ],
+            [
+                'method' => 'getValue',
+                'willReturn' => true
+            ]
+        ];
+
+        $dataValueService = $this->getDataValueServiceMock($dataValueServiceFunctions);
+        $taskLoggerService = $this->getTaskLoggerServiceMock();
+        $apiService = $this
+            ->getMockBuilder(ApiService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $entityManager = $this->getEntityManagerMock($entityManagerFunctions);
+        $sockPoller = new SockPollerService($taskLoggerService, $apiService);
+
+        $task = new Task();
+        $task->setType(Task::TYPE_BUILD);
+        $task->setStatus(Task::STATUS_NEW);
+        $task->setApplicationEnvironment($applicationEnvironment);
+
+        $arguments = [
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager,
+            $sockPoller,
+        ];
+        $methods = [
+            'createSockDatabase' => function () {
+                return null;
+            }
+        ];
+
+        $provisioner = $this->getProvisionerMock($arguments, $methods);
+        $provisioner->setTask($task);
+        $provisioner->run();
+    }
+
     public function testOnBuildWithException()
     {
+        $this->expectException(LoggedException::class);
         $prodEnvironment = new Environment();
         $prodEnvironment->setName('prod');
         $prodEnvironment->setProd(true);
@@ -436,11 +474,11 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
             $taskLoggerService,
             $apiService,
             $entityManager,
-            $sockPoller
+            $sockPoller,
         ];
         $methods = [
-            'createSockAccount' => function () {
-                throw new ClientException('This is an exception.', $this->getRequestMock());
+            'createSockDatabase' => function () {
+                throw new ClientException('This is an exception.', $this->getRequestMock(), $this->getMockBuilder(ResponseInterface::class)->getMock());
             },
         ];
 
@@ -456,12 +494,18 @@ class BuildSockAccountProvisionerTest extends AbstractProvisionerTest
         $apiService = $this->getApiServiceMock();
         $entityManager = $this->getEntityManagerMock();
         $sockPoller = new SockPollerService($taskLoggerService, $apiService);
-        $provisioner = new BuildSockAccountProvisioner($dataValueService, $taskLoggerService, $apiService, $entityManager, $sockPoller);
-        $this->assertEquals($provisioner->getName(), 'Sock account');
+        $provisioner = new BuildSockDatabaseProvisioner(
+            $dataValueService,
+            $taskLoggerService,
+            $apiService,
+            $entityManager,
+            $sockPoller
+        );
+        $this->assertEquals($provisioner->getName(), 'Sock database');
     }
 
     protected function getProvisionerClass()
     {
-        return BuildSockAccountProvisioner::class;
+        return BuildSockDatabaseProvisioner::class;
     }
 }

@@ -46,7 +46,7 @@ class SockServerFieldTypeTest extends TestCase
         ];
 
         $apiService
-            ->expects($this->at(0))
+            ->expects($this->atLeastOnce())
             ->method('getVirtualServers')
             ->willReturn($servers);
 
