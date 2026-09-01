@@ -5,10 +5,10 @@
   "license": "MIT",
   "authors": [],
   "support": {},
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "require": {
-    "php": ">=7.1",
-    "symfony/cache": "^6.0",
+    "php": ">=8.1",
+    "symfony/cache": "^6.0 || ^7.0",
     "doctrine/orm": "^2.5",
     "digipolisgent/domainator9k-core-bundle": "^4.0",
     "guzzlehttp/guzzle": "^7.2"
